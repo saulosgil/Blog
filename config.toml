@@ -98,10 +98,6 @@ enableEmoji = true
       icon_pack = "ai"
       url       = "https://orcid.org/0000-0001-9050-0073"
   [[params.social]]
-      icon      = "orcid" # icon name without the 'fa-'
-      icon_pack = "ai"
-      url       = "https://orcid.org/0000-0001-9050-0073"
-  [[params.social]]
       icon      = "lattes" # icon name without the 'fa-'
       icon_pack = "ai"
       url       = "http://lattes.cnpq.br/2692765757170763"

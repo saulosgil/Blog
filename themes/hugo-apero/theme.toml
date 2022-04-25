@@ -1,8 +1,8 @@
 name = "Apéro"
 license = "CC-BY-4.0"
 licenselink = "https://github.com/hugo-apero/hugo-apero/blob/master/LICENSE.md"
-description = "A Hugo theme you'll want to hang out with."
-homepage = "https://hugo-apero.netlify.app"
+description = "BEM VINDOS À MINHA PAGINA PESSOAL!"
+homepage = "https://saulogil.netlify.app/"
 tags = ["blog", "personal", "portfolio", "responsive", "customizable"]
 features = ["blog", "projects", "talks", "events", "collections", "contact form"]
 min_version = "0.79.0"
