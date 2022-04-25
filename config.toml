@@ -123,6 +123,11 @@ enableEmoji = true
     url = "/about/"
     weight = 1
   [[menu.header]]
+    name = "Saulo Gil"
+    title = "Saulo Gil"
+    url = "/about/"
+    weight = 1
+  [[menu.header]]
     name = "Blog"
     title = "Blog"
     url = "/blog/"
