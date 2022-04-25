@@ -122,8 +122,8 @@ enableEmoji = true
 [menu]
   # Configure header
   [[menu.header]]
-    name = "About"
-    title = "About Blogophonic"
+    name = "Página Inicial"
+    title = "Página Inicial"
     url = "/about/"
     weight = 1
   [[menu.header]]
@@ -132,25 +132,25 @@ enableEmoji = true
     url = "/blog/"
     weight = 2
   [[menu.header]]
-    name = "Projects"
-    title = "Project Portfolio"
+    name = "Projetos"
+    title = "Projetos"
     url = "/project/"
     weight = 3
   [[menu.header]]
-    name = "Talks"
-    title = "Talks"
+    name = "Apresentações"
+    title = "Apresentações"
     url = "/talk/"
     weight = 4
   [[menu.header]]
-    name = "A collection"
-    title = "A collection"
+    name = "Publicações"
+    title = "Publicações"
     url = "/collection/"
     weight = 5
-  [[menu.header]]
-    name = "Elements"
-    title = "Element Page"
-    url = "/elements/"
-    weight = 6
+#  [[menu.header]]
+#    name = "Elements"
+#    title = "Element Page"
+#    url = "/elements/"
+#    weight = 6
 
   # Configure footer
   [[menu.footer]]
@@ -158,16 +158,16 @@ enableEmoji = true
     title = "License"
     url = "/license/"
     weight = 1
-  [[menu.footer]]
-    name = "Contact"
-    title = "Contact form"
-    url = "/contact/"
-    weight = 2
-  [[menu.footer]]
-    name = "Contributors"
-    title = "Contributors"
-    url = "/contributors/"
-    weight = 3
+#  [[menu.footer]]
+#    name = "Contact"
+#    title = "Contact form"
+#    url = "/contact/"
+#    weight = 2
+#  [[menu.footer]]
+#    name = "Contributors"
+#    title = "Contributors"
+#    url = "/contributors/"
+#    weight = 3
 
 # see https://gohugo.io/about/hugo-and-gdpr/
 [privacy]
