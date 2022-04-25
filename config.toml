@@ -120,7 +120,7 @@ enableEmoji = true
   [[menu.header]]
     name = "Página Inicial"
     title = "Página Inicial"
-    url = "/about/"
+    url = "/"
     weight = 1
   [[menu.header]]
     name = "Saulo Gil"
