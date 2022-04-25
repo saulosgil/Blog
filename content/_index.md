@@ -8,7 +8,7 @@ images:
 - img/revoir.jpg
 show_action_link: true
 show_social_links: true
-subtitle: `Se tu o desejas, podes voar, só tens de confiar muito em ti`.(Steve Jobs)
+subtitle: Se tu o desejas, podes voar, só tens de confiar muito em ti.(Steve Jobs)
 text_align_left: false
 title: Saulo Gil
 type: home
