@@ -8,7 +8,7 @@ images:
 - img/revoir.jpg
 show_action_link: true
 show_social_links: true
-subtitle: A imaginação é mais importante que o conhecimento, porque o conhecimento é limitado, ao passo que a imaginação abrange o mundo inteiro (Albert Einstein)
+subtitle: `Se tu o desejas, podes voar, só tens de confiar muito em ti`.(Steve Jobs)
 text_align_left: false
 title: Saulo Gil
 type: home
