@@ -16,4 +16,4 @@ title: Bariátrica x Exercício
 knitr::include_graphics("featured.jpg")
 ```
 
-[Clique para acessar a palestra!](https://www.youtube.com/watch?v=VczVfbruO4w)
+[Clique para assistir o vídeo!](https://www.youtube.com/watch?v=VczVfbruO4w)
