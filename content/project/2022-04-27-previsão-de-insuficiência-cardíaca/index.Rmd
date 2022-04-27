@@ -1,0 +1,18 @@
+---
+author: Saulo Gil
+categories:
+- Theme Features
+- R
+- package
+date: "2022-04-27"
+draft: false
+excerpt: O presente projeto consiste em uma análise da base de dados disponível no Kaggle para predição de Insuficiência cardiaca. 
+  websites.
+featured: true
+layout: single-sidebar
+subtitle: "Em Construção"
+tags:
+- hugo-site
+title: Previsão De Insuficiência Cardíaca
+---
+
