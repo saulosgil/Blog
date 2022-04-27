@@ -1,0 +1,19 @@
+---
+author: Saulo Gil
+categories:
+- meetup
+date: "2019-10-20"
+draft: false
+excerpt: Vídeo realizado para a 1° edição do Prêmio Vídeo Pós Graduação.
+featured: true
+layout: single
+location: Online
+subtitle: Prêmio Vídeo Pós-Graduação
+title: Bariátrica x Exercício
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+knitr::include_graphics("featured.jpg")
+```
+
+[Clique para acessar a palestra!](https://www.youtube.com/watch?v=VczVfbruO4w)
