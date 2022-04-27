@@ -1,0 +1,19 @@
+---
+author: Saulo Gil
+categories:
+- meetup
+date: "2021-09-22"
+draft: false
+excerpt: A cirurgia bariátrica tem se mostrado a mais efetiva estratégia para tratar a obesidade mórbida. Contudo, este procedimento não é livre de efeitos adversos. Neste sentido, esta palestra conta os resultados de nossa pesquisa sobre os efeitos do exercicio físico em parâmetros da saúde de mulheres submetidas a cirurgia bariátrica.
+featured: true
+layout: single
+location: Online
+subtitle: XV Semana Cientifica do PET Educação Física - Vacina e ciência salvam vidas
+title: Treinamento e Cirurgia Bariátrica
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+knitr::include_graphics("featured.jpg")
+```
+
+[Clique para acessar a palestra!](https://www.youtube.com/watch?v=QqWhAaB-XfA)
