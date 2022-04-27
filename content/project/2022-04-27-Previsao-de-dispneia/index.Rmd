@@ -1,0 +1,18 @@
+---
+author: Saulo Gil
+categories:
+- Theme Features
+- R
+- package
+date: "2022-04-27"
+draft: false
+excerpt: O presente projeto consiste na predição de dispneia em sobreviventes da COVID-19 6-9 meses após alta hospitalar. 
+  websites.
+featured: true
+layout: single-sidebar
+subtitle: "Em Construção"
+tags:
+- hugo-site
+title: Predição De Dispneia em Sobreviventes da COVID-19
+---
+
