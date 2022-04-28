@@ -9,7 +9,7 @@ featured: true
 layout: single
 location: Online
 subtitle: USP Video Award
-title: Bariatric surgery vs. Exercise training 
+title: Bariatric surgery vs. Exercise training (In portuguese) 
 ---
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
