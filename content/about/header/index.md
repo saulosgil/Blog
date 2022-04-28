@@ -3,19 +3,19 @@
 text_align_right: false
 show_title_as_headline: false
 headline: |
-  Olá, eu sou o Saulo!
+  Hello, I'm Saulo!
 ---
 
 <!-- this is a subheadline -->
- - Meu nome é `Saulo Gil`;
+ - My name is `Saulo Gil`;
  
- - Atualmente sou `pesquisador` no `HCFMUSP` no qual realizo meu projeto de pós-doutorado. Meu projeto busca reduzir a perda de massa muscular de pacientes idosos internados;
+ - I'm currently `researcher` at `HCFMUSP` where I carry out my postdoctoral. My research try to reduce the loss of muscle mass in hospitalized elderly patients;
  
- - Faço graduação em `Análise e Desenvolvimento de Sistemas` (UNISA);
+ - I'm also a undergrad student at `Systems Analysis and Development` (UNISA);
  
- - Sou `professor` na Universidade Santo Amaro (UNISA);
+ - I'm `associate professor` at Physical Education Departament at Universidade Santo Amaro (UNISA);
  
- - Sou `Doutor` em Ciência pela `Universidade de São Paulo`. Durante meu doutorado investiguei os `Efeito do treinamento físico na massa muscular de pacientes com obesidade submetido a cirurgia bariátrica`;
+ - I'm a `Phd` in Science from the `University of São Paulo`. During my PhD I investigated the `Effect of exercise training on muscle mass in women undergoing bariatric surgery`;
  
 
 

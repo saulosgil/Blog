@@ -117,13 +117,13 @@ enableEmoji = true
 
 [menu]
   # Configure header
+#  [[menu.header]]
+#    name = "Página Inicial"
+#    title = "Página Inicial"
+#    url = "/"
+#    weight = 1
   [[menu.header]]
-    name = "Página Inicial"
-    title = "Página Inicial"
-    url = "/"
-    weight = 1
-  [[menu.header]]
-    name = "Saulo Gil"
+    name = "About"
     title = "Saulo Gil"
     url = "/about/"
     weight = 1
@@ -133,12 +133,12 @@ enableEmoji = true
     url = "/blog/"
     weight = 2
   [[menu.header]]
-    name = "Projetos"
+    name = "Projects"
     title = "Projetos"
     url = "/project/"
     weight = 3
   [[menu.header]]
-    name = "Apresentações"
+    name = "Talks"
     title = "Apresentações"
     url = "/talk/"
     weight = 4

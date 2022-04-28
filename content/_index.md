@@ -1,14 +1,14 @@
 ---
-action_label: Leia mais &rarr;
+action_label: READ MORE &rarr;
 action_link: /about
 action_type: text
-description: O conteúdo deste site envolve a divulgação de minhas publicações científicas, artigos de opinião e projetos na área de ciência de dados utilizando linguagem R.
+description: The content of this site involves the dissemination of my scientific publications, opinion articles and projects in the area of data science using R language.
 image_left: true
 images:
 - img/dna.jpeg
 show_action_link: true
 show_social_links: true
-subtitle: Se tu o desejas, podes voar, só tens de confiar muito em ti (Steve Jobs)
+subtitle: If you want it, you can fly, you just have to trust you a lot (Steve Jobs)
 text_align_left: false
 title: Saulo Gil
 type: home
