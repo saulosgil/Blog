@@ -4,16 +4,16 @@ categories:
 - meetup
 date: "2019-10-20"
 draft: false
-excerpt: Vídeo realizado para a 1° edição do Prêmio Vídeo Pós Graduação.
+excerpt: Cartoon for the 1st edition of the USP Video Award.
 featured: true
 layout: single
 location: Online
-subtitle: Prêmio Vídeo Pós-Graduação
-title: Bariátrica x Exercício
+subtitle: USP Video Award
+title: Bariatric surgery vs. Exercise training 
 ---
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 knitr::include_graphics("featured.jpg")
 ```
 
-[Clique para assistir o vídeo!](https://www.youtube.com/watch?v=VczVfbruO4w)
+[click to access!](https://www.youtube.com/watch?v=VczVfbruO4w)

@@ -11,7 +11,7 @@ cascade:
     text_link_label: View recent talks
     text_link_url: /talk/
 description: |
-  Lista de aulas gravadas, apresentações, slides e banners utilizados em congressos.
+  This is a list of talks, workshops, or other events.
 layout: list
 show_author_byline: true
 show_button_links: true
