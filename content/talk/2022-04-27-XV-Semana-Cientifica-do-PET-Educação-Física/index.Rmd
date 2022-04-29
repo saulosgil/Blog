@@ -16,4 +16,4 @@ title: Exercise training and bariatric surgery (In portuguese)
 knitr::include_graphics("featured.jpg")
 ```
 
-[click to acess!](https://www.youtube.com/watch?v=QqWhAaB-XfA)
+[click to access!](https://www.youtube.com/watch?v=QqWhAaB-XfA)

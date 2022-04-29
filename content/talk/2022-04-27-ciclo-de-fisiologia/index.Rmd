@@ -16,4 +16,4 @@ title: Importance of exercise training in the treatment post- bariatric surgery 
 knitr::include_graphics("featured.jpg")
 ```
 
-[click to acess!](https://www.youtube.com/watch?v=71SsynoU-1U)
+[click to access!](https://www.youtube.com/watch?v=71SsynoU-1U)
