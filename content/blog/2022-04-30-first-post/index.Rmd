@@ -1,0 +1,32 @@
+---
+title: First Post!
+subtitle: ""
+excerpt: "Who am I? What do I do?"
+date: '2022-04-30'
+author: Saulo Gil
+draft: false
+images:
+series:
+layout: single
+slug: []
+categories: []
+tags: []
+---
+# Who am I`r emojifont::emoji("question")` What do I do`r emojifont::emoji("question")`
+
+I spent time thinking what about my first post could be and, finally, I decided that it would be about me! So, here we go!
+
+My name is Saulo and I was born 16th September 1986 (please take note for sending me a gift`r emojifont::emoji("stuck_out_tongue_winking_eye")`). I graduated in physical education in 2008. In 2012, I initiated the master's degree course in the School of Physical Education and Sport at the University of São Paulo. During this period my research focus was to investigate strength training models to maximize physical performance in distinct sports like soccer, athletics, mixed-martial arts, and so on. In parallel with the post-graduation course, I worked in the [Nucleus of High Performance in Sport(NAR)](https://www.narsp.com.br), a center of excellence in research, evaluation, prescription of sports training, and training of coaches and physical trainers, focused on the high performance of athletes and professional teams. In the NAR I worked with great athletes such as Olympic medalists like [Robson Conceição (boxer - gold medal in Rio 2016)](https://en.wikipedia.org/wiki/Robson_Concei%C3%A7%C3%A3o), [Esquiva Falcão (boxer - silver medal in London 2012)](https://en.wikipedia.org/wiki/Esquiva_Falc%C3%A3o), [Maurren Maggi (long jump - gold medal in Beijing 2008)](https://en.wikipedia.org/wiki/Maurren_Maggi), MMA athletes like [Vitor Belfort (MMA - Ultimate Fighting Championship)](https://en.wikipedia.org/wiki/Vitor_Belfort), [Demian Maia (MMA - Ultimate Fighting Championship)](https://en.wikipedia.org/wiki/Demian_Maia), and many others high performance athletes. This experience was **WONDERFUL** `r emojifont::emoji("exclamation")`. I completed the master's degree course in 2014.
+
+In 2016, I had to leave my job in sports to start my Ph.D. course in the same University. During this time, I started to deepen my studies in skeletal muscle physiology that was central topic of my research about the effects of exercise training on skeletal muscle of women undergoing bariatric surgery. This period was very important for me as a researcher due to the possibility to learn a lot of laboratory technics to understand the cellular, molecular and physical adaptations arising from exercise in post-bariatric surgery patients. In 2020, during the COVID-19 pandemic, [I defended my Ph.D.](https://pubmed.ncbi.nlm.nih.gov/34666419/) and, in parallel, I started a new research project with patients hospitalized with COVID-19 to verify if [muscle mass and strength are predictors of hospital lenght of stay](https://pubmed.ncbi.nlm.nih.gov/34523262/) and how impact of muscle atrophy in health-costs (in progress). These studies are related to my postdoc scholarship in the School of Medicine of the University of São Paulo. Now, I'm at the early-scientific-career crisis, asking me: **"Who am I**`r emojifont::emoji("question")` **What do I do**`r emojifont::emoji("question")` But this issue is topic of another post.   
+
+During the postgraduate course (and until now`r emojifont::emoji("exclamation")`), I was fascinated by statistics. I think fantastic (and very relevant) the many forms to extract information from a database, particularly, when the database is big! Thus, I have also deepened my studies in programming language and statistical learning. Currently, I'm an undergrad student of Systems Analysis and Development and, I'm very focused to learn everything related to the machine learning world.  
+
+
+# What I will do here`r emojifont::emoji("question")`
+
+Finally, I intend to post brief scientific publications posts related to research that I'm involved in, opinion articles, and projects in the area of data science that I will intend to develop in order to practice skills acquired in my studies.
+
+Hope you enjoyed it!`r emojifont::emoji("stuck_out_tongue_winking_eye")`!
+
+![](https://us.123rf.com/450wm/alesika/alesika2008/alesika200800157/153702004-see-you-soon-inscription-handwritten-lettering-illustration-black-vector-text-in-speech-bubble-simpl.jpg?ver=6)
