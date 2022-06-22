@@ -29,4 +29,7 @@ Finally, I intend to post brief scientific publications posts related to researc
 
 Hope you enjoyed it!`r emojifont::emoji("stuck_out_tongue_winking_eye")`!
 
+## Reference
+[Gil S. et al (2022) Association between Post-acute Sequelae of SARS-CoV-2 and Physical Inactivity: A Cohort Study of 614 COVID-19 survivors (Pre-print)](https://www.researchsquare.com/article/rs-1638885/v1)
+
 ![](https://us.123rf.com/450wm/alesika/alesika2008/alesika200800157/153702004-see-you-soon-inscription-handwritten-lettering-illustration-black-vector-text-in-speech-bubble-simpl.jpg?ver=6)
