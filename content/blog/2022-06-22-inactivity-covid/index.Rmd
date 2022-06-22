@@ -1,5 +1,5 @@
 ---
-title: "COVID-related inactivity: an old and new issue!`"
+title: "COVID-related inactivity: an old and new issue!"
 subtitle: ""
 excerpt: ""
 date: '2022-06-22'
