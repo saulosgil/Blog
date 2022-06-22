@@ -13,21 +13,23 @@ categories: []
 tags: []
 ---
 
-The pandemic of the coronavirus disease 2019 (COVID-19) has caused morbidity and mortality at an unprecedented global scale with millions of confirmed cases, hospitalizations, and deaths. Fortunately, with vaccination, the cases required hospitalization and deaths dramatically decreased, but a new issue arising from COVID-19 making focus, which is the elevated prevalence of persistent symptoms, named **long-COVID**, such as fatigue, weakness, dyspnea, decline in quality of life among others.
+The pandemic of the coronavirus disease 2019 (COVID-19) has caused morbidity and mortality at an unprecedented global scale with millions of confirmed cases, hospitalizations, and deaths. Fortunately, with vaccination, the cases requiring hospitalization and deaths dramatically decreased, but a new issue arising from COVID-19 making focus, which is the elevated prevalence of persistent symptoms, named **long-COVID**, such as fatigue, weakness, dyspnea, decline in quality of life among others.
 
-The list of persistent symptoms is very wide as we can observe in the below figure. However, I would like to pay attention to fatigue, that have an occurrence higher than 50%. Of course, all symptoms are important and demand care, but I highlight fatigue because it may trigger other unhealthy behavior like physical inactivity, thus increasing the risk of developing other diseases.
+The list of persistent symptoms is very wide as we can observe in the below figure. However, I would like to pay attention to fatigue, that have an occurrence higher than 50%. Of course, all symptoms are important and demand care, but I highlighted fatigue because it may trigger other unhealthy behavior like physical inactivity (i.e., <150 min/week at moderate-to-vigorous physical activity) that is widely recognized as an independent risk factor for impaired functional status, musculoskeletal disorders, anxiety and depression, and all-cause mortality. 
 
 ```{r echo=FALSE, fig.align="center"}
 knitr::include_graphics(path = "long_covid_nature.jpg")
 ```
 
-Our analyses indicated an elevated prevalence of physical inactivity in patients with some persistent symptom related to COVID-19. In brief, prevalence of physical inactivity in patients exhibiting none, at least 1, 1 to 4, and 5 or more symptoms were 51%, 62%, 58%, and 71%, respectively. The frequency of physical inactivity in patients reporting different PASC were: dyspnea (77%), fatigue (69%), severe muscle/joint pain (66%), insomnia (66%), post-traumatic stress disorder (65%), memory impairments (65%), anxiety (65%), taste (65%) and smell (63%) loss, and depression (62%). Figure details the prevalence of physical inactivity according to the presence of long-COVID.
+As I participated of a large prospective, multidisciplinary cohort study of COVID-19 survivors discharged from the largest tertiary hospital of Latin America (Clinical Hospital, School of Medicine of the University of Sao Paulo), I led some analysis in the database to investigate whether long-COVID are associated with physical inactivity.   
+
+In brief, our analyses indicated an elevated prevalence of physical inactivity in patients with some persistent symptom related to COVID-19. For example, prevalence of physical inactivity in patients exhibiting none, at least 1, 1 to 4, and 5 or more symptoms were 51%, 62%, 58%, and 71%, respectively. The frequency of physical inactivity in patients reporting different PASC were: dyspnea (77%), fatigue (69%), severe muscle/joint pain (66%), insomnia (66%), post-traumatic stress disorder (65%), memory impairments (65%), anxiety (65%), taste (65%) and smell (63%) loss, and depression (62%). Figure details the prevalence of physical inactivity according to the presence of long-COVID.
 
 ```{r echo=FALSE, fig.align="center"}
 knitr::include_graphics(path = "plot.jpeg")
 ```
 
-In another perspective of analyses, we observed that presence of long-COVID dramatically increase the chance to be inactivity. For instance, the presence of long-COVID was associated with 56% greater odds of physical inactivity, and having ≥ 5 persistent symptoms (vs. none) increased the odds of inactivity to 133%`r emojifont::emoji("exclamation")`
+In another perspective of analyses, we observed that presence of long-COVID dramatically increase the chance to be inactivity. For instance, the presence of at least one persistent symptom was associated with 56% greater odds of physical inactivity, and having ≥ 5 persistent symptoms (vs. none) increased the odds of inactivity to 133%`r emojifont::emoji("exclamation")` The figure below details the chance to be physically inactive according to the presence of long-COVID.
 
 ```{r echo=FALSE, fig.align="center"}
 knitr::include_graphics(path = "plot2.jpeg")
@@ -35,10 +37,13 @@ knitr::include_graphics(path = "plot2.jpeg")
 
 These novel data indicate that healthcare professionals and policy makers should be concerned about the need to early identify recovering COVID-19 patients who may be prone to inactivity, given the role of physical inactivity as a risk factor for overall morbidity and mortality and its potential burden to health systems worldwide.
 
+The full manuscript is under-review, but it may be read as a pre-print [here](https://www.researchsquare.com/article/rs-1638885/v1)
+
 Hope you enjoyed it!`r emojifont::emoji("stuck_out_tongue_winking_eye")`!
 
 ## References
-[Gil S. et al. (2022) Association between Post-acute Sequelae of SARS-CoV-2 and Physical Inactivity: A Cohort Study of 614 COVID-19 survivors (under-review)]{https://www.researchsquare.com/article/rs-1638885/v1}
+[Gil S. et al. (2022) Association between Post-acute Sequelae of SARS-CoV-2 and Physical Inactivity: A Cohort Study of 614 COVID-19 survivors (under-review)](https://www.researchsquare.com/article/rs-1638885/v1)
+
 [Lopez-Leon S., More than 50 Long-term effects of COVID-19: a systematic review and meta-analysis](https://www.nature.com/articles/s41598-021-95565-8)
 
 
