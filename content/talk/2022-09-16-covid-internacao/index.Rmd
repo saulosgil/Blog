@@ -8,8 +8,8 @@ excerpt: Strength and muscle mass are predictors of relevant clinical outcomes i
 featured: true
 layout: single
 location: Online
-subtitle: Ciclo de Fisiologia
-title: Muscle strength and muscle mass as predictors of hospital length of stay in patients with moderate to severe COVID-19: a prospective observational study (In portuguese)
+subtitle: Study animation
+title: Muscle Strength and muscle mass as predictor of lenght in COVID-19 patients (In portuguese)
 ---
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
