@@ -16,4 +16,4 @@ title: Muscle Strength and muscle mass as predictor of lenght of stay in COVID-1
 knitr::include_graphics("featured.jpg")
 ```
 
-[click to access!](https://www.youtube.com/watch?v=l7xZLxY8kSQ)
+[click to access!](https://www.youtube.com/watch?v=KLnrSs8SwJs)
