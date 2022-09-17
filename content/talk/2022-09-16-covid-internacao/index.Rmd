@@ -1,0 +1,19 @@
+---
+author: Saulo Gil
+categories:
+- meetup
+date: "2022-09-16"
+draft: false
+excerpt: Strength and muscle mass are predictors of relevant clinical outcomes in critically ill patients, but in hospitalized patients with COVID-19, it remains to be determined. In this prospective observational study, we demostrated that muscle strength and muscle mass are predictive of hospital length of stay in patients with moderate to severe COVID-19 patients.
+featured: true
+layout: single
+location: Online
+subtitle: Ciclo de Fisiologia
+title: Muscle strength and muscle mass as predictors of hospital length of stay in patients with moderate to severe COVID-19: a prospective observational study (In portuguese)
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+knitr::include_graphics("featured.jpg")
+```
+
+[click to access!](https://www.youtube.com/watch?v=l7xZLxY8kSQ)
