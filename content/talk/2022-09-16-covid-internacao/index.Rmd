@@ -9,7 +9,7 @@ featured: true
 layout: single
 location: Online
 subtitle: Study animation
-title: Muscle Strength and muscle mass as predictor of lenght of stay in COVID-19 patients
+title: Muscle Strength and muscle mass as predictor of lenght of stay in COVID-19 patients 
 ---
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
