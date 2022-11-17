@@ -1,0 +1,263 @@
+---
+title: "Heart Disease Data set - An Unsupervised Learning Approach"
+subtitle: ""
+excerpt: ""
+date: '2022-06-22'
+author: Saulo Gil
+draft: false
+images:
+series:
+layout: single
+slug: []
+categories: []
+tags: []
+---
+This project consists in an Unsupervised Learning analysis of the Heart Disease data set available in the [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/heart+Disease).  
+
+This database contains 76 attributes, but all published experiments refer to using a subset of 14 of them. So, we opted to use just 14 tributes of the Cleveland database that are commonly used ML researchers. 
+
+The attributes are following:
+
+*age* = age in years.
+
+*sex* = sex (1 = male; 0 = female).
+
+*cp* = chest pain type
+
+- Value 1: typical angina
+
+- Value 2: atypical angina
+
+- Value 3: non-anginal pain
+
+- Value 4: asymptomatic,
+
+*trestbps* = resting blood pressure (in mm Hg on admission to the hospital),
+
+*chol* = serum cholestoral in mg/dl,
+
+*fbs* = fasting blood sugar > 120 mg/dl (1 = true; 0 = false),
+
+*restecg* = resting electrocardiographic results,
+
+*thalach* = maximum heart rate achieved,
+
+*exang* = exercise induced angina (1 = yes; 0 = no),
+
+*oldpeak* = ST depression induced by exercise relative to rest,
+
+*slope* = the slope of the peak exercise ST segment,
+
+*ca* = number of major vessels (0-3) colored by flourosopy,
+
+*thal* = 3 = normal; 6 = fixed defect; 7 = reversable defect,
+
+*num* = diagnosis of heart disease (angiographic disease status)(1 = true; 0 = false)
+
+**LET'S START** `r emojifont::emoji("exclamation")`
+
+# Packages 
+```{r message=FALSE, warning=FALSE, include=TRUE}
+library(tidyverse)
+library(DT)
+library(factoextra)
+library(gridExtra)
+```
+
+# Pre-processing 
+## Loading and adjusting database
+
+The dataset was downloaded [here](https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/) and, as dataset comes without column names, I included column names using *r colnames function* from {r base}. Then, I removed all categorical variables considering since that i intend to reduce the dimensionality of the data using Principal Component Analysis (PCA) which do not appear to be an adequate approach for categorical variables. More details may be checked [here](https://towardsdatascience.com/pca-is-not-feature-selection-3344fb764ae6)      
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+data <- 
+  read_csv("processed.cleveland.data", 
+    col_names = FALSE)
+
+colnames(data) <- c(
+  "age",
+  "sex",
+  "cp",
+  "trestbps",
+  "chol",
+  "fbs",
+  "restecg",
+  "thalach",
+  "exang",
+  "oldpeak",
+  "slope",
+  "ca",
+  "thal",
+  "num"
+)
+
+data <- 
+  data |>
+  mutate(ca = as.double(ca)) |> 
+  select(-sex,
+         -cp,
+         -fbs,
+         -exang,
+         -thal,
+         -num)
+```
+
+The filtered dataset can be checked above.
+
+```{r}
+datatable(data = data, rownames = FALSE)
+```
+
+## Verifying missing values
+```{r out.width="100%"}
+DataExplorer::plot_missing(data) +
+  theme_bw() + 
+  theme(legend.title = element_blank(),
+        legend.position = "none")
+```
+
+Looking missing value plot, we observed an low frequency of missing value in the variable *ca*, and I opted to remove then.
+
+## Removing missing data
+```{r}
+data <-
+  drop_na(data)
+```
+
+## Lets see missing data again
+```{r out.width="100%"}
+DataExplorer::plot_missing(data) +
+  theme_bw() + 
+  theme(legend.title = element_blank(),
+        legend.position = "none")
+```
+
+Yeah, now, we does not have missing values `r emojifont::emoji("exclamation")`
+Now, let's to see data summary.
+
+## Data summary
+```{r out.width="100%"}
+skimr::skim(data)
+```
+
+We may observed a wide range in the units of the variables. So, I opted to scale all variables in order to put then in standardized units, in the case, using z-score. 
+Now, we may observe standardized units for all variables.
+
+Now, let's to reduce dimentionality `r emojifont::emoji("exclamation")`
+
+## Scaling data - z-score approach
+
+```{r out.width="100%"}
+data_scaled <- scale(data)
+
+skimr::skim(data_scaled)
+```
+
+# Reducing the dimensionality
+
+Following to apply PCA and plot, we may observe that first component shows 30% of the variance while second component just 16%. Also, we are not able to identify any visual cluster. Therefore, let's apply k-means and hierarchical clustering approaches in order to identify clusters.
+
+Let's start by hierarchical clustering.
+
+In brief, 
+
+```{r out.width = "100%"}
+PCA <- princomp(data_scaled)
+
+PCA |> 
+  fviz(element = "ind") +
+  theme_bw()
+```
+
+# Clustering
+
+## Checking optimal number of clustering using Hierarchical Clustering
+
+Hierarchical clustering is an unsupervised machine learning algorithm for identifying groups in the dataset. It does not require us to pre-specify the number of clusters to be generated. Furthermore, hierarchical clustering has an added advantage over other commonly used methods in that it results in an attractive tree-based representation of the observations, called a dendrogram. More details may be checked [here](translate.google.com.br/?hl=pt-BR&sl=auto&tl=pt&op=translate)
+
+Firstly, let's to determine optimal number of cluster elbow method.
+As we can observe above, the "elbow" is not clear. 
+Let-s to see another method, i.e., silhouette method, to indicate optimal number of cluster.
+
+```{r out.width="100%"}
+fviz_nbclust(data_scaled, hcut, method = "wss")
+```
+
+```{r out.width="100%"}
+fviz_nbclust(data_scaled, hcut, method = "silhouette")
+```
+
+Despite of elbow and silhouette methods are not equivalent, i will used 4 cluster.
+Let's to see dendrogram and 
+
+
+```{r out.width="100%"}
+#hierarchichal clustering using k = 4
+
+hc <- hcut(data_scaled, k = 4,
+           hc_method = "ward.D2",
+           hc_metric = "euclidean")
+
+# Plot the obtained dendrogram
+plot(hc, cex = 0.6, hang = -10)
+```
+
+```{r out.width="100%"}
+fviz_cluster(hc, data = data_scaled) +
+  theme_bw()
+```
+After trying distinct approaches using Hierarchical Cluster method the figure below illustrated the 4 clusters as silhouette method suggested. Thus, it is notable that this approach were not able to identify appropriately the cluster.
+
+Let's to try K-means method `r emojifont::emoji("exclamation")`
+
+In brief, K-means clustering is the most commonly used unsupervised machine learning algorithm for partitioning a given data set into a set of k groups (i.e. k clusters), where k represents the number of groups pre-specified by the analyst. It classifies objects in multiple groups (i.e., clusters), such that objects within the same cluster are as similar as possible (i.e., high intra-class similarity), whereas objects from different clusters are as dissimilar as possible (i.e., low inter-class similarity). In k-means clustering, each cluster is represented by its center (i.e, centroid) which corresponds to the mean of points assigned to the cluster. For more details click [here](https://uc-r.github.io/kmeans_clustering)
+
+
+## Checking optimal number of clustering using K-Means 
+```{r out.width="100%"}
+fviz_nbclust(data_scaled, kmeans, method = "wss")
+```
+
+```{r out.width="100%"}
+fviz_nbclust(data_scaled, kmeans, method = "silhouette")
+```
+
+Differently of the hierarchical clustering, both elbow and silhouette method indicated 2 cluster in the dataset.
+
+Let's obsverve it `r emojifont::emoji("exclamation")`
+
+```{r out.width="100%"}
+k2 <- kmeans(data_scaled,
+             centers = 2,
+             nstart = 25)
+
+fviz_cluster(k2,data = data_scaled) +
+  theme_bw()
+```
+
+Wowww, now we are able to see clusters `r emojifont::emoji("exclamation")`. Nice, but let's to try some more cluster for us to see if something is better `r emojifont::emoji("exclamation")`
+
+```{r out.width="100%"}
+k3 <- kmeans(data_scaled, centers = 3, nstart = 25)
+k4 <- kmeans(data_scaled, centers = 4, nstart = 25)
+k5 <- kmeans(data_scaled, centers = 5, nstart = 25)
+
+# plots to compare
+p1 <- fviz_cluster(k2, geom = "point", data = data_scaled) + ggtitle("k = 2")
+p2 <- fviz_cluster(k3, geom = "point",  data = data_scaled) + ggtitle("k = 3")
+p3 <- fviz_cluster(k4, geom = "point",  data = data_scaled) + ggtitle("k = 4")
+p4 <- fviz_cluster(k5, geom = "point",  data = data_scaled) + ggtitle("k = 5")
+
+grid.arrange(p1, p2, p3, p4,
+             nrow = 2) +
+  theme_bw()
+```
+Observing plots above, we can observe that elbow and silhouette methods indicated adequately the number of cluster, since that there are some overlaps when using more cluster.
+
+# Final
+
+In the conclusion, the K-means method with 2 cluster appear to offer an adequate clusterization of the heart disease dataset. Thus, this algorithm would may be utilized to determine specific medical care for each cluster of patients. It is noteworthy  that the analyses performed herein are not intended to be used in practice. However, these analysis reinforce the utilization of unsupervised machine learning in the health care scenario.
+
+Hope you enjoyed it!`r emojifont::emoji("stuck_out_tongue_winking_eye")`!
+
+![](https://us.123rf.com/450wm/alesika/alesika2008/alesika200800157/153702004-see-you-soon-inscription-handwritten-lettering-illustration-black-vector-text-in-speech-bubble-simpl.jpg?ver=6)
