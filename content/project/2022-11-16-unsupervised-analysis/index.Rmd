@@ -1,7 +1,7 @@
 ---
 title: "Heart Disease Data set - An Unsupervised Learning Approach"
 subtitle: ""
-excerpt: ""
+excerpt: "This project consistis in an Unsupervised Learning analysis of the Heart Disease data set available in the UCI Machine Learning Repository"
 date: '2022-06-22'
 author: Saulo Gil
 draft: false
