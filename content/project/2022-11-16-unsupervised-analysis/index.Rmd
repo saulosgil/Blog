@@ -14,7 +14,7 @@ tags: []
 ---
 This project consists in an Unsupervised Learning analysis of the Heart Disease data set available in the [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/heart+Disease).  
 
-This database contains 76 attributes, but all published experiments refer to using a subset of 14 of them. So, we opted to use just 14 tributes of the Cleveland database that are commonly used ML researchers. 
+This database contains 76 attributes, but all published experiments refer to subset of 14 of them. So, we opted to use just 14 attributes of the Cleveland database that are commonly used ML researchers. 
 
 The attributes are following:
 
@@ -67,7 +67,7 @@ library(gridExtra)
 # Pre-processing 
 ## Loading and adjusting database
 
-The dataset was downloaded [here](https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/) and, as dataset comes without column names, I included column names using *r colnames function* from {r base}. Then, I removed all categorical variables considering since that i intend to reduce the dimensionality of the data using Principal Component Analysis (PCA) which do not appear to be an adequate approach for categorical variables. More details may be checked [here](https://towardsdatascience.com/pca-is-not-feature-selection-3344fb764ae6)      
+The dataset was downloaded [here](https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/) and, as data set comes without column names, I included column names using *r colnames function* from {r base}. Then, I removed all categorical variables since that I intend to reduce the dimensionality of the data using Principal Component Analysis (PCA) which do not appear to be an adequate approach for categorical variables. More details may be checked [here](https://towardsdatascience.com/pca-is-not-feature-selection-3344fb764ae6)      
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 data <- 
@@ -102,19 +102,25 @@ data <-
          -num)
 ```
 
-The filtered dataset can be checked above.
+The filtered data set can be checked above.
 
 ```{r}
 datatable(data = data, rownames = FALSE)
 ```
 
 ## Verifying missing values
-```{r out.width="100%"}
-DataExplorer::plot_missing(data) +
-  theme_bw() + 
+```{r include=FALSE}
+plot <- 
+  DataExplorer::plot_missing(data) +
+  theme_bw() +  
   theme(legend.title = element_blank(),
         legend.position = "none")
 ```
+
+```{r out.width="100%"}
+plot
+```
+
 
 Looking missing value plot, we observed an low frequency of missing value in the variable *ca*, and I opted to remove then.
 
@@ -124,15 +130,20 @@ data <-
   drop_na(data)
 ```
 
-## Lets see missing data again
-```{r out.width="100%"}
-DataExplorer::plot_missing(data) +
+## Let's to see missing data again
+```{r include=FALSE}
+plot_2 <- 
+  DataExplorer::plot_missing(data) +
   theme_bw() + 
   theme(legend.title = element_blank(),
         legend.position = "none")
 ```
 
-Yeah, now, we does not have missing values `r emojifont::emoji("exclamation")`
+```{r out.width="100%"}
+plot_2
+```
+
+Yeah, now, we do not have missing values `r emojifont::emoji("exclamation")`
 Now, let's to see data summary.
 
 ## Data summary
@@ -140,7 +151,7 @@ Now, let's to see data summary.
 skimr::skim(data)
 ```
 
-We may observed a wide range in the units of the variables. So, I opted to scale all variables in order to put then in standardized units, in the case, using z-score. 
+We may observe a wide range in the units of the variables. So, I opted to scale all variables in order to put then in standardized units (z-score). 
 Now, we may observe standardized units for all variables.
 
 Now, let's to reduce dimentionality `r emojifont::emoji("exclamation")`
