@@ -194,7 +194,7 @@ cost_plot <-
   theme(legend.position = "top",
         legend.title = element_blank()) +
   scale_fill_manual(values = c("red", "blue")) +
-  geom_text(aes(label = glue::glue("U${value}%")),
+  geom_text(aes(label = glue::glue("U${value}")),
             position = position_dodge(width = 0.9),
             vjust = -1,
             size = 4
