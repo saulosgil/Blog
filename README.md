@@ -6,7 +6,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The repository refers to everything posted in my personal webpage.
+This repository refers to everything posted in my personal webpage.
 
 I hope you enjoy!!!
 
