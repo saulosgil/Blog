@@ -9,13 +9,10 @@ headline: |
 <!-- this is a subheadline -->
  - My name is `Saulo Gil`;
  
- - I'm currently `researcher` at `HCFMUSP` where I carry out my postdoctoral. My research try to reduce the loss of muscle mass in hospitalized elderly patients;
+ - I'm a `Phd` in Science from the `University of São Paulo`;
  
- - I'm also a undergrad student at `Systems Analysis and Development` (UNISA);
+ - I'm currently a `researcher` at `HCFMUSP` (Post-doctoral fellow) investigating interventions to counteract muscle atrophy in catabolic conditions (e.g., aging, obesity and bedrest);
  
- - I'm `associate professor` at Physical Education Departament at Universidade Santo Amaro (UNISA);
+ - I'm an `associate professor` at Physical Education Department and Master's Degree course in Health Science at Universidade Santo Amaro (UNISA);
  
- - I'm a `Phd` in Science from the `University of São Paulo`. During my PhD I investigated the `Effect of exercise training on muscle mass in women undergoing bariatric surgery`;
- 
-
-
+ - I'm an undergraduate student in `Systems Analysis and Development` (UNISA); 
