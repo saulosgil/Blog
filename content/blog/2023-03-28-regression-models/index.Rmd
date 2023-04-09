@@ -282,18 +282,19 @@ library(patchwork)
 
 # WARNING
 
-![](https://us.123rf.com/450wm/alesika/alesika2008/alesika200800157/153702004-see-you-soon-inscription-handwritten-lettering-illustration-black-vector-text-in-speech-bubble-simpl.jpg?ver=6)
+![](https://www.onlygfx.com/wp-content/uploads/2017/12/warning-stamp-2.png)
 
 This content is related to my studies in statistics and, thus it is not an academic reference. Please, more detailed information can be checked in the reference listed below.
 
+## Hope you enjoyed it!`r emojifont::emoji("stuck_out_tongue_winking_eye")`!
 
-### Reference 
+![](https://us.123rf.com/450wm/alesika/alesika2008/alesika200800157/153702004-see-you-soon-inscription-handwritten-lettering-illustration-black-vector-text-in-speech-bubble-simpl.jpg?ver=6)
+
+
+### References 
 -[Spline Regression in R](https://medium.com/analytics-vidhya/spline-regression-in-r-960ca82aa62c)
 
 -[Estimating regression models with unknown break-points](https://onlinelibrary.wiley.com/doi/10.1002/sim.1545)
 
 -[An Introduction to StatisticalLearning](https://www.statlearning.com/)
 
-Hope you enjoyed it!`r emojifont::emoji("stuck_out_tongue_winking_eye")`!
-
-![](https://us.123rf.com/450wm/alesika/alesika2008/alesika200800157/153702004-see-you-soon-inscription-handwritten-lettering-illustration-black-vector-text-in-speech-bubble-simpl.jpg?ver=6)
