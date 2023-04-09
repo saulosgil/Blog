@@ -1,0 +1,295 @@
+---
+title: "Regression models - What should I use?"
+subtitle: ""
+excerpt: ""
+date: '2023-29-03'
+author: Saulo Gil
+draft: false
+images:
+series:
+layout: single
+slug: []
+categories: []
+tags: []
+---
+
+<script src="{{< blogdown/postref >}}index_files/htmlwidgets/htmlwidgets.js"></script>
+<link href="{{< blogdown/postref >}}index_files/datatables-css/datatables-crosstalk.css" rel="stylesheet" />
+<script src="{{< blogdown/postref >}}index_files/datatables-binding/datatables.js"></script>
+<script src="{{< blogdown/postref >}}index_files/jquery/jquery-3.6.0.min.js"></script>
+<link href="{{< blogdown/postref >}}index_files/dt-core/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="{{< blogdown/postref >}}index_files/dt-core/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="{{< blogdown/postref >}}index_files/dt-core/js/jquery.dataTables.min.js"></script>
+<link href="{{< blogdown/postref >}}index_files/crosstalk/css/crosstalk.min.css" rel="stylesheet" />
+<script src="{{< blogdown/postref >}}index_files/crosstalk/js/crosstalk.min.js"></script>
+
+
+<div id="regression-models" class="section level1">
+<h1>Regression models</h1>
+<p>Explicar os conceitos básicos da regressão e terminar falando que existem vários modelos.</p>
+</div>
+<div id="lets-go-to-code" class="section level1">
+<h1>Let’s go to code!</h1>
+<p>Cololocar um gif digitando</p>
+<div id="packages-required" class="section level2">
+<h2>Packages required</h2>
+<pre class="r"><code>library(splines)
+library(tidyverse)
+library(patchwork)
+library(ggthemes)</code></pre>
+</div>
+<div id="the-dataset" class="section level2">
+<h2>The dataset</h2>
+<div id="htmlwidget-1" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"filter":"none","vertical":false,"caption":"<caption>Table 1 - Variations of prices along days.<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13"],[5,10,25,45,70,85,90,100,110,125,130,150,175],[100,125,250,300,350,460,510,460,430,400,370,340,330]],"container":"<table class=\"cell-border stripe\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Days<\/th>\n      <th>Prices<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"dom":"tip","columnDefs":[{"className":"dt-right","targets":[1,2]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="lets-see-the-data" class="section level2">
+<h2>Let’s see the data</h2>
+<pre class="r"><code>g1 &lt;-
+  df |&gt; 
+  ggplot(aes(x = Days,y = Prices)) +
+  geom_point(colour = &quot;red&quot;, size = 4) +
+  labs(title = &quot;DATASET - VARIATIONS OF PRICES ALONG DAYS&quot;) +
+  theme_igray()
+
+g1</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>
+<div id="linear-regression" class="section level2">
+<h2>Linear regression</h2>
+<pre class="r"><code># Linear model
+m1 &lt;- lm(Prices ~ Days, df)
+summary(m1)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Prices ~ Days, data = df)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -139.85  -93.42    3.01   54.87  164.01 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)   
+## (Intercept) 214.8439    54.4988   3.942   0.0023 **
+## Days          1.4572     0.5434   2.681   0.0214 * 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 100.6 on 11 degrees of freedom
+## Multiple R-squared:  0.3953,	Adjusted R-squared:  0.3403 
+## F-statistic:  7.19 on 1 and 11 DF,  p-value: 0.02135</code></pre>
+<pre class="r"><code># plot linear model
+g2 &lt;- 
+  df |&gt; 
+  ggplot(aes(x = Days,y = Prices)) +
+  geom_point(colour = &quot;red&quot;, size = 4) + 
+  geom_smooth(method = &quot;lm&quot;, color = &quot;blue&quot;, size = 1, se = FALSE) +
+  labs(title = &quot;LINEAR REGRESSION&quot;) +
+  theme_igray()</code></pre>
+<pre><code>## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+## ℹ Please use `linewidth` instead.</code></pre>
+<pre class="r"><code>g2</code></pre>
+<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>
+<div id="polynomial-regression-degree-2" class="section level2">
+<h2>Polynomial regression (degree = 2)</h2>
+<pre class="r"><code># Polynomial model
+m2 &lt;- lm(Prices ~ poly(Days, degree = 2) + Days, df)
+summary(m2)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Prices ~ poly(Days, degree = 2) + Days, data = df)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -50.868 -27.769  -8.723  25.461  79.423 
+## 
+## Coefficients: (1 not defined because of singularities)
+##                         Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)               340.38      11.81  28.820 5.89e-11 ***
+## poly(Days, degree = 2)1   269.70      42.58   6.333 8.53e-05 ***
+## poly(Days, degree = 2)2  -305.20      42.58  -7.167 3.04e-05 ***
+## Days                          NA         NA      NA       NA    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 42.58 on 10 degrees of freedom
+## Multiple R-squared:  0.9015,	Adjusted R-squared:  0.8817 
+## F-statistic: 45.74 on 2 and 10 DF,  p-value: 9.293e-06</code></pre>
+<pre class="r"><code># Polynomial model (degree 2)
+# predict
+pred_m2 &lt;- predict(m2, interval = &quot;confidence&quot;)
+
+# join fit and dataset 
+dfm2 = cbind(df, pred_m2)
+head(dfm2)</code></pre>
+<pre><code>##   Days Prices      fit       lwr      upr
+## 1    5    100 105.8922  44.82455 166.9598
+## 2   10    125 137.9914  82.99586 192.9870
+## 3   25    250 224.5391 182.77250 266.3058
+## 4   45    300 317.1858 281.57246 352.7992
+## 5   70    350 396.4312 359.37304 433.4894
+## 6   85    460 424.4782 387.00816 461.9482</code></pre>
+<pre class="r"><code># plot
+g3 &lt;- 
+  dfm2 |&gt; 
+  ggplot(aes(x = Days, y = Prices)) +
+  geom_point(colour = &quot;red&quot;, size = 4) + 
+  geom_line(aes(y = fit), color = &quot;blue&quot;, size = 1) +
+  labs(title = &quot;POLYNOMIAL REGRESSION (DEGREE 2)&quot;) +
+  theme_igray()
+
+g3</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+</div>
+<div id="segmented-model" class="section level2">
+<h2>Segmented model</h2>
+<pre class="r"><code># dataset with categorical variable
+dfseg &lt;- 
+  df |&gt; 
+  mutate(x = if_else(condition = Days &lt;= 90,true = 0,false = 1),
+         dif = Days - 90,
+         X = dif * x)
+
+# Segmetned Model
+m3 &lt;- lm(Prices ~ Days + X, dfseg)
+summary(m3)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Prices ~ Days + X, data = dfseg)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -42.225 -14.984  -5.498  12.875  46.956 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  97.9434    17.8594   5.484 0.000268 ***
+## Days          4.2040     0.2764  15.207 3.06e-08 ***
+## X            -6.2271     0.5294 -11.763 3.52e-07 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 27.39 on 10 degrees of freedom
+## Multiple R-squared:  0.9592,	Adjusted R-squared:  0.9511 
+## F-statistic: 117.7 on 2 and 10 DF,  p-value: 1.125e-07</code></pre>
+<pre class="r"><code># predict
+pred_m3 &lt;- predict(m3, interval = &quot;confidence&quot;)
+
+# join predict with dataset 
+dfm3 = cbind(df, pred_m3)
+head(dfm3)</code></pre>
+<pre><code>##   Days Prices      fit       lwr      upr
+## 1    5    100 118.9635  81.75959 156.1675
+## 2   10    125 139.9837 105.28876 174.6786
+## 3   25    250 203.0441 175.18069 230.9075
+## 4   45    300 287.1246 265.39615 308.8531
+## 5   70    350 392.2253 369.45134 414.9993
+## 6   85    460 455.2857 427.46105 483.1104</code></pre>
+<pre class="r"><code>#plot
+g4 &lt;- 
+  dfm3 |&gt; 
+  ggplot(aes(x = Days, y = Prices)) +
+  geom_point(colour = &quot;red&quot;, size = 4) +
+  geom_line(aes(y = fit), color = &quot;blue&quot;, size = 1, size = 1) +
+  labs(title = &quot;SEGMENTED REGRESSION (Knot = 90)&quot;) +
+  theme_igray()</code></pre>
+<pre><code>## Warning: Duplicated aesthetics after name standardisation: size</code></pre>
+<pre class="r"><code>g4</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="spline-regression" class="section level2">
+<h2>Spline Regression</h2>
+<pre class="r"><code># Spline Model
+m4 &lt;- lm(Prices ~ splines::bs(Days,knots = 90),data = df)
+summary(m4)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Prices ~ splines::bs(Days, knots = 90), data = df)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -67.049 -10.104   0.231   7.411  54.292 
+## 
+## Coefficients:
+##                                Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)                      110.92      28.30   3.920  0.00442 ** 
+## splines::bs(Days, knots = 90)1   117.52      76.30   1.540  0.16207    
+## splines::bs(Days, knots = 90)2   546.36      70.59   7.740 5.53e-05 ***
+## splines::bs(Days, knots = 90)3   168.90      65.68   2.572  0.03304 *  
+## splines::bs(Days, knots = 90)4   218.64      44.29   4.936  0.00114 ** 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 35.52 on 8 degrees of freedom
+## Multiple R-squared:  0.9452,	Adjusted R-squared:  0.9177 
+## F-statistic: 34.47 on 4 and 8 DF,  p-value: 4.324e-05</code></pre>
+<pre class="r"><code># Predict
+pred_m4 &lt;- predict(m4, interval = &quot;confidence&quot;)
+
+# join predict with dataset
+dfm4 = cbind(df, pred_m4)
+head(dfm4)</code></pre>
+<pre><code>##   Days Prices      fit       lwr      upr
+## 1    5    100 110.9248  45.66805 176.1816
+## 2   10    125 132.6080  83.20237 182.0137
+## 3   25    250 206.0837 153.15574 259.0116
+## 4   45    300 310.1035 253.39056 366.8165
+## 5   70    350 417.0486 375.98397 458.1133
+## 6   85    460 451.4096 410.54148 492.2777</code></pre>
+<pre class="r"><code># plot
+g5 &lt;- 
+  dfm4 |&gt; 
+  ggplot(aes(x = Days, y = Prices)) +
+  geom_point(colour = &quot;red&quot;, size = 4) +
+  geom_line(aes(y = fit), color = &quot;blue&quot;, size = 1, size = 1) +
+  labs(title = &quot;SPLINE REGRESSION (Knot = 90)&quot;) +
+  theme_igray()</code></pre>
+<pre><code>## Warning: Duplicated aesthetics after name standardisation: size</code></pre>
+<pre class="r"><code>g5</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+</div>
+<div id="what-should-i-use" class="section level1">
+<h1>What should I use?</h1>
+<pre class="r"><code>g1 / (g2 | g3) / (g4 | g5)</code></pre>
+<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<div id="references" class="section level3">
+<h3>References</h3>
+<p><a href="https://medium.com/analytics-vidhya/spline-regression-in-r-960ca82aa62c">Spline Regression in R</a></p>
+<!-- Briefly, eighty COVID-19 survivors aged 59±14 years were prospectively assessed. -->
+<!-- Handgrip strength (an indicator of general strength) and vastus lateralis muscle cross-sectional area (CSAVL) were evaluated at hospital admission, discharge, and 6 months after discharge. PASC were evaluated 6 months after discharge (main outcome). Also, health care costs were evaluated 2 and 6 months after hospital discharge. Other outcomes were evaluated and may be checked in the [manuscript](https://doi.org/10.1016/j.jamda.2022.11.013).  -->
+<!-- To examine whether the magnitude of muscle mass loss impacts the outcomes, we ranked patients according to relative CSAVL reduction during hospital stay into either “high muscle loss” (-18±11%) or “low muscle loss” (-4±2%) group, based on median values. -->
+<!-- # What did we find in the muscle mass and strength? -->
+<!-- Despite the muscle mass loss is expected, we observed a mean decrease of nearly two-fold (~10%) in vastus lateralis muscle cross-sectional area in about 10 days of hospitalization among patients with COVID-19, indicating a higher magnitude of muscle loss in comparison to other catabolic conditions (reduction of about 5-7% of quadriceps femoral cross-sectional area after 5-14 days of muscle disuse [i.e., immobilization or bed rest]).  -->
+<!-- ❗️❗️❗️Importantly, the handgrip strength loss findings were parallel as muscle mass loss, indicating structural and functional impairments in the skeletal muscle.    -->
+<!-- ```{r echo=FALSE, fig.align="center", out.width="100%"} -->
+<!-- knitr::include_graphics(path = "muscle-mass-strength-loss.png") -->
+<!-- ``` -->
+<!-- # What did we find in the persistent symptoms related to COVID-19 (Long-COVID)? -->
+<!-- As we observed drastic muscle mass loss in a group of patients (labeled as *High Muscle Loss*), it is reasonable to assume elevated frequency of persistent symptoms in these individuals in comparison with its counterparts with modest muscle mass loss (labeled as *Low Muscle Loss*).  -->
+<!-- Indeed, our findings revealed a greater frequency of fatigue and myalgia in patients experiencing greater loss of muscle mass, suggesting that the magnitude of muscle mass loss may be associated with higher frequency of PASC. Although this is an interesting notion, it is important to highlight that our study design does not allow establishing causation❗️  -->
+<!-- ```{r echo=FALSE, fig.align="center", out.width="100%"} -->
+<!-- knitr::include_graphics(path = "symptoms.png") -->
+<!-- ``` -->
+<!-- # And the health care costs, What did we find? -->
+<!-- It is not abused to speculate that elevated muscle mass loss and prevalence of PASC may increase the requirement of medical assistance and thus increasing health care costs. -->
+<!-- This idea is supported by our results indicated that patients suffering more drastic losses of muscle during hospital stay due to COVID-19 (and greater prevalence of PASC) had higher total COVID-19 related health costs than lower muscle mass loss group 2 (US$ 77283.87 vs. 3057.14) and 6 months (US$ 90001.35 vs. 12913.27) after hospital discharge. Of note, our data indicate higher expenditures for management of COVID-19 survivors than those observed in other medical conditions associated to low muscle mass during hospital stay such as major abdominal surgery [(≈ US$ 40000.00)](https://pubmed.ncbi.nlm.nih.gov/33887547/), thoracolumbar spine surgery [(≈ US$ 53128.00)](https://pubmed.ncbi.nlm.nih.gov/28984514/), and one-year postoperative [(≈ US$ 40000.00)](https://pubmed.ncbi.nlm.nih.gov/25990695/).  -->
+<!-- ```{r echo=FALSE, fig.align="center", out.width="100%"} -->
+<!-- knitr::include_graphics(path = "costs.png") -->
+<!-- ``` -->
+<!-- Finally, COVID-19 survivors experiencing high muscle mass loss during hospital stay fail to fully recover muscle health and show greater presence of PASC, namely fatigue and myalgia, and higher costs with hospital admission and total COVID-19-related health care 2 and 6 months after hospital discharge than those losing less muscle. -->
+<!-- **These findings have two practical applications**.  -->
+<!-- From a **clinical perspective**, muscle mass loss emerges as measure of poor prognosis in hospitalized patients and, as such, should be therapeutically approached.  -->
+<!-- From a **public health standpoint**, muscle loss following COVID-19 hospitalization was shown to be associated with greater health care costs, which can add pressure on the health care systems.  -->
+<p>Hope you enjoyed it!😜!</p>
+<!-- ## References -->
+<!-- [Gil S. et al. (2022) Acute Muscle Mass Loss Predicts Long-Term Fatigue, Myalgia, and Health Care Costs in COVID-19 Survivors](https://doi.org/10.1016/j.jamda.2022.11.013) -->
+<!-- [Bokshan SL et al. (2017) Inpatient costs and blood transfusion rates of sarcopenic patients following thoracolumbar spine surgery](https://pubmed.ncbi.nlm.nih.gov/28984514/) -->
+<!-- [Xi F. et al. (2021) Low skeletal muscle mass predicts poor clinical outcomes in patients with abdominal trauma](https://pubmed.ncbi.nlm.nih.gov/33887547/) -->
+<!-- [Kirk PS. et al. (2015) One-year postoperative resource utilization in sarcopenic patients](https://pubmed.ncbi.nlm.nih.gov/25990695/) -->
+<p><img src="https://us.123rf.com/450wm/alesika/alesika2008/alesika200800157/153702004-see-you-soon-inscription-handwritten-lettering-illustration-black-vector-text-in-speech-bubble-simpl.jpg?ver=6" /></p>
+</div>
+</div>
