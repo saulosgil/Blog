@@ -9,7 +9,7 @@ link_list_label:  # bookmarks, elsewhere, etc.
 link_list:
 - name: Data Science
   url: https://en.wikipedia.org/wiki/Data_science
-- name: Muscle Aatrophy
+- name: Muscle Atrophy
   url: https://en.wikipedia.org/wiki/Muscle_atrophy
 - name: Exercise 
   url: https://en.wikipedia.org/wiki/Exercise
