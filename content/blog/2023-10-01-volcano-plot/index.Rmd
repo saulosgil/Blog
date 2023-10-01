@@ -18,7 +18,7 @@ tags: []
 <!-- badges: start -->
 <!-- badges: end -->
 
-A volcano plot is a type of scatter-plot that is used to identify changes in large data sets. It is very used by bioinformatic researches when analyzing data from "omics" technologies (e.g., genomics, proteomics, metabolomics, metagenomics, phenomics and transcriptomics). It plots significance versus fold-change on the y and x axes, respectively. It enables quick visual identification of genes with large fold changes that are also statistically significant.
+A volcano plot is a type of scatter-plot that is used to identify changes in large data sets. It is very used by bioinformatic researchers when analyzing data from "omics" technologies (e.g., genomics, proteomics, metabolomics, metagenomics, phenomics and transcriptomics). It plots significance versus fold-change on the y and x axes, respectively. It enables quick visual identification of genes with large fold changes that are also statistically significant.
 
 Briefly, in a volcano plot, the most upregulated genes are towards the right, the most downregulated genes are towards the left, and the most statistically significant genes are towards the top. 
 
