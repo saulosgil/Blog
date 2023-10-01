@@ -1,5 +1,5 @@
 ---
-title: "Volcano Plor tutorial with R"
+title: "Volcano Plot with R"
 subtitle: ""
 excerpt: ""
 date: '2023-10-01'
@@ -12,7 +12,7 @@ slug: []
 categories: []
 tags: []
 ---
-# Volcano Plor tutorial with R
+# Volcano Plot with R
 ## What's that for??
 
 <!-- badges: start -->
@@ -29,7 +29,7 @@ Herein, I replicated the codes from a wonderful tutorial to create a volcano plo
 ## SO, LET'S TO DO IT
 
 ## Packages required
-```{r load packages}
+```{r load packages, echo=TRUE, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(janitor)# Cleaning column names  
 library(scales)# Transform axis scales
@@ -40,7 +40,7 @@ library(ggrepel)# Optimise plot label separation
 
 Firstly, we need to access the dataset!
 
-The dataset used to create volcano plot is from study of Fu et at. (2025) intitle **EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival**. This study explored the role and regulation of Mcl-1 in mammopoiesis and the RNA-seq dataset can be accessed and downloaded on this [site](https://zenodo.org/record/2529117#.X-_obzTis2w).
+The dataset used to create volcano plot is from study of Fu et at. (2025) intitle [EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival](https://pubmed.ncbi.nlm.nih.gov/25730472/). This study explored the role and regulation of Mcl-1 in mammopoiesis and the RNA-seq dataset can be accessed and downloaded on this [site](https://zenodo.org/record/2529117#.X-_obzTis2w).
 
 
 But...I don't understand anything about the topic!!!!
@@ -50,7 +50,7 @@ But...I don't understand anything about the topic!!!!
 No problem, neither do I but we don't need to understand it to create a beautiful Volcano plot!
 
 
-```{r importing data}
+```{r importing data, echo=TRUE, message=FALSE, warning=FALSE}
 # Load dataset -----------------------------------------------------------------
 samples <- read_delim("raw_data/limma-voom_luminalpregnant-luminallactate", 
     delim = "\t",
@@ -64,30 +64,41 @@ samples <- clean_names(samples)
 # Manually edit column names using rename()  
 samples <- samples |> 
   rename(entrez_id = entrezid, # from entrezid to entrez_id
-         gene_name = genename) # from genename to gene_name
-
-# Visualise the dataset as a table --------------------------------------------- 
-samples |> 
-  head(6) |> 
-  knitr::kable()
+         gene_name = genename)  # from genename to gene_name
 ```
 
-The data contains five columns:
+Let's see the dataset!
 
-* *Entrez ID* - stores the unique gene ID;
-* *Gene symbol* - stores the gene symbol associated with an unique Entrez ID;
-* *Gene name* - stores the gene name associated with an unique Entrez ID;
-* *log2(Fold change)* - stores the log2-transformed change in gene expression level between two types of tissue samples;
-* *Adjusted p-value* - stores the p-value adjusted with a false discovery rate (FDR) correction for multiple testing.
+```{r table, echo=TRUE, message=FALSE, warning=FALSE}
+# Visualise the dataset as a table ---------------------------------------------
+# round numeric values
+samples |> 
+  mutate(
+    log_fc = round(log_fc, digits = 2),
+    ave_expr = round(ave_expr, digits = 2),
+    t = round(t, digits = 2),
+    p_value = round(p_value, digits = 2),
+    adj_p_val = round(adj_p_val, digits = 2)
+  ) |> 
+  DT::datatable()
+```
 
-## Basic volcano plot
+The data contains the following columns:
 
-As beforementioned, volcano plot display the significance data (i.e., adjusted p-value) versus fold-change (i.e., log2(Fold change)) on the y and x axes, respectively.
+* **Entrez ID** - stores the unique gene ID;
+* **Gene symbol** - stores the gene symbol associated with an unique Entrez ID;
+* **Gene name** - stores the gene name associated with an unique Entrez ID;
+* **log2(Fold change)** - stores the log2-transformed change in gene expression level between two types of tissue samples;
+* **Adjusted p-value** - stores the p-value adjusted with a false discovery rate (FDR) correction for multiple testing.
+
+## Basic Volcano Plot
+
+As before mentioned, the volcano plot display the significance data (i.e., adjusted p-value) versus the fold-change [i.e., log2(Fold change)] on the y and x axes, respectively.
 
 *Note:* The transformation -log10(adj_p_val) allows points on the plot to project upwards as the fold change increases or decreases in magnitude.
 
 
-### Volcano plot
+### Our first Volcano plot
 ```{r Volcano plot}
 # volcano plot -------------------------------------------------
 vol_plot <-
@@ -100,11 +111,15 @@ vol_plot <-
 vol_plot # Visualise ggplot output
 ```
 
+It appears very simple and uninformative! But there is good news, it can be improved a lot!
+
+
 ## Add horizontal and vertical lines
 
 It is very common to determine cutoffs for adjusted p-value and log_fc.
 
 Let's to insert these cutoffs:
+
 * adj_p_value <= 0.05;     
 * log_fc <= -1 (i.e., downregulated);
 * log_fc >= 1 (i.e., upregulated);
@@ -118,7 +133,9 @@ vol_plot +
              linetype = "dashed")
 ```
 
-Now, we can observe that there are a lot of genes up- and down-regulated according to the predetermined cutoff. But, it is possible to improve!!!
+Now, we can observe that there are a lot of genes upregulated and downregulated according to the predetermined cutoff. 
+
+But, it still is possible to improve more!!!
 
 ## Modify the x-axis and y-axis
 
@@ -132,18 +149,15 @@ samples |>
   select(log_fc) |> 
   min() |> 
   floor() 
-#> [1] -10   
 
 samples |> 
   select(log_fc) |> 
   max() |> 
   ceiling()
-#> [1] 8   
 
 c(-10, 8) |> 
   abs() |> 
   max()
-#> [1] 10  
 
 # Modify xlim() ----------------------------------------------------------------  
 # Manually specify x-axis limits  
@@ -152,7 +166,7 @@ vol_plot +
              linetype = "dashed") + 
   geom_vline(xintercept = c(log2(0.5), log2(2)),
              linetype = "dashed") + 
-  xlim(-10, 10) 
+  xlim(-10, 10)
 ```
 
 Furthermore, it is possible to change the limits of the x-axis with more ticks. 
@@ -176,8 +190,6 @@ Now, we have a good volcano plot! Let's to customize others details to make it m
 
 To add color, size, and transparency are useful strategies to visualize different gene groups. But, first, we need to categorize genes into different groups and store these categories as a new column of data. 
 
-Let's try to do it! 
-
 * Genes with log_fc >= 1 & adj_p_val <= 0.05 as **up**;
 * Genes with log_fc <= -1 & adj_p_val <= 0.05 as **down**;
 * All other genes labelled as **ns** i.e. non-significant;
@@ -186,37 +198,119 @@ Let's try to do it!
 # Create new categorical column ------------------------------------------------
 samples <- 
   samples |> 
-  mutate(gene_type = case_when(log_fc >= 1 & adj_p_val <= 0.05 ~ "up",
-                               log_fc <= -1 & adj_p_val <= 0.05 ~ "down",
+  mutate(gene_type = case_when(log_fc >= 1 & adj_p_val <= 0.05 ~ "upregulated",
+                               log_fc <= -1 & adj_p_val <= 0.05 ~ "downregulated",
                                TRUE ~ "ns"))   
 
 # Count gene_type categories ---------------------------------------------------
 samples |> 
   count(gene_type) |> 
-  knitr::kable()
+  DT::datatable(caption = "Table 2. Number of downregulated, upregulated and non-significant manner regulated genes")
 ```
 
+Now, let's to customize adding color, size, and transparency!
+
+```{r adding color, size, and transparency}
+# Add colour, size and alpha (transparency) to volcano plot --------------------
+cols <- c("upregulated" = "#ffad73",
+          "downregulated" = "#26b3ff",
+          "ns" = "grey") 
+
+sizes <- c("upregulated" = 2,
+           "downregulated" = 2,
+           "ns" = 1) 
+
+alphas <- c("upregulated" = 1,
+            "downregulated" = 1,
+            "ns" = 0.5)
+
+samples |> 
+  ggplot(aes(x = log_fc,
+             y = -log10(adj_p_val),
+             fill = gene_type,
+             size = gene_type,
+             alpha = gene_type)) + 
+  geom_point(shape = 21, # Specify shape and colour as fixed local parameters    
+             colour = "black") + 
+  geom_hline(yintercept = -log10(0.05),
+             linetype = "dashed") + 
+  geom_vline(xintercept = c(log2(0.5), log2(2)),
+             linetype = "dashed") +
+  scale_fill_manual(values = cols) + # Modify point colour
+  scale_size_manual(values = sizes) + # Modify point size
+  scale_alpha_manual(values = alphas) + # Modify point transparency
+  scale_x_continuous(breaks = c(seq(-10, 10, 1)),  
+                     limits = c(-10, 10))+
+  theme_bw()
+```
+
+## Label points of interest - The most useful tool!
 
 
+```{r Label points, message=FALSE, warning=FALSE}
+# Define another subset of interest from the original data ---------------------
+sig_il_genes <- 
+  samples |> 
+  filter(symbol %in% c("Il15",
+                       "Il34",
+                       "Il24"))
 
+up_il_genes <- 
+  samples |> 
+  filter(symbol == "Il24")  
 
+down_il_genes <- 
+  samples |> 
+  filter(symbol %in% c("Il15", 
+                       "Il34"))  
 
+# Modify legend labels by re-ordering gene_type levels -------------------------
+samples <- 
+  samples |> 
+  mutate(gene_type = fct_relevel(gene_type, "upregulated", "downregulated")) 
 
+ggplot(data = samples,
+       aes(x = log_fc,
+           y = -log10(adj_p_val))) + 
+  geom_point(aes(colour = gene_type), 
+             alpha = 0.2, 
+             shape = 16,
+             size = 1) + 
+  geom_point(data = up_il_genes,
+             shape = 21,
+             size = 2, 
+             fill = "firebrick", 
+             colour = "black") + 
+  geom_point(data = down_il_genes,
+             shape = 21,
+             size = 2, 
+             fill = "steelblue", 
+             colour = "black") + 
+  geom_hline(yintercept = -log10(0.05),
+             linetype = "dashed") + 
+  geom_vline(xintercept = c(log2(0.5), log2(2)),
+             linetype = "dashed") +
+  geom_label_repel(data = sig_il_genes, # Add labels last so they appear as the top layer  
+                   aes(label = symbol),
+                   force = 2,
+                   nudge_y = 1) +
+  scale_colour_manual(values = cols) + 
+  scale_x_continuous(breaks = c(seq(-10, 10, 2)),     
+                     limits = c(-10, 10)) +
+  theme_bw() + # Select theme with a white background  
+  theme(panel.border = element_rect(colour = "black", fill = NA, size= 0.5),    
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank())   
+```
 
+#                     **AMAZING VOLCANO PLOT!**
+![](https://media.istockphoto.com/photos/rendering-falling-in-love-emoji-isolated-on-white-background-picture-id954670328?k=6&m=954670328&s=612x612&w=0&h=1pE3eQQkJP5mtaJLWHeyDVi-u76KU5TA-yk3WcDJL0M=)
 
+So, that's it!
 
-
-
-
-
-
-
-
-
-## Hope you enjoyed it!`r emojifont::emoji("stuck_out_tongue_winking_eye")`!
+Thanks again to **Erika Duan** for the amazing tutorial!
 
 ![](https://us.123rf.com/450wm/alesika/alesika2008/alesika200800157/153702004-see-you-soon-inscription-handwritten-lettering-illustration-black-vector-text-in-speech-bubble-simpl.jpg?ver=6)
-
 
 ### References 
 -[How to draw a volcano plot using ggplot2 from Erika Duan People](https://github.com/erikaduan/r_tips/blob/master/tutorials/dv-volcano_plots_with_ggplot/dv-volcano_plots_with_ggplot.md)
