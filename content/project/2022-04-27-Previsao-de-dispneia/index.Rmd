@@ -4,7 +4,7 @@ categories:
 - Theme Features
 - R
 - package
-date: "2022-04-27"
+date: "2024-01-06"
 draft: false
 excerpt: This project aims to model machine learning algoritms to predict dyspnea in COVID-19 survivors 6-9 months after hospital discharge. 
   websites.
@@ -13,6 +13,189 @@ layout: single-sidebar
 subtitle: "In progress"
 tags:
 - hugo-site
-title: Machine learning for Predicting Dispneia in COVID-19 Survivors
+title: Using XGboost to Predict Dyspnea in COVID-19 Survivors
 ---
 
+## Packages
+```{r message=FALSE, warning=FALSE}
+# Pacotes
+library(tidyverse)
+library(tidymodels)
+library(GGally)
+library(DataExplorer)
+library(vip)
+library(doParallel)
+```
+
+## Reading dataset
+```{r}
+# Lendo a base
+dispneia <- read.csv2('df_ajustada.csv')
+```
+
+## Spliting dataset - Train/Test
+```{r}
+set.seed(32)
+
+dispneia_initial_split <- initial_split(dispneia,
+                                        prop = 0.8,
+                                        strata = "dispneia")
+dispneia_initial_split
+
+# train and test datasets
+dispneia_train <- training(dispneia_initial_split)
+
+dispneia_test <- testing(dispneia_initial_split)
+```
+
+## Exploratory analysis 
+### Overview
+```{r}
+skimr::skim(dispneia_train)
+```
+
+### Missing values
+
+```{r, fig.height=12, fig.width=14, message=FALSE, warning=FALSE}
+plot_missing(dispneia_train)
+```
+
+## Checking the correlation and distribution of numerical features
+
+```{r, out.width="100%"}
+dispneia_train |>  
+  select(where(is.numeric)) |>  
+  cor(use = "pairwise.complete.obs") |> 
+  corrplot::corrplot(method = "number")
+```
+```{r, fig.height=14, fig.width=14, message=FALSE, warning=FALSE}
+dispneia_train |>  
+  select(where(is.numeric), dispneia) |> 
+  ggpairs(aes(colour = dispneia))
+```
+
+```{r, fig.height=14, fig.width=16}
+dispneia_train |>  
+  select(c(where(is.numeric), dispneia)) |> 
+  pivot_longer(-dispneia, 
+               names_to = "Feature",
+               values_to = "Value") |> 
+  ggplot(aes(y = dispneia, 
+             x = Value, 
+             fill = dispneia)) +
+  geom_boxplot() +
+  facet_wrap(~Feature,
+             scales = "free_x") +
+  ggtitle("Dyspnea vs. Numeric Features")
+```
+
+```{r, fig.height=14, fig.width=16}
+dispneia_train |>  
+  select(c(where(is.numeric), dispneia)) |> 
+  pivot_longer(-dispneia, 
+               names_to = "Feature",
+               values_to = "Value") |> 
+  ggplot(aes(x = Value, 
+             colour = dispneia)) +
+  stat_ecdf() +
+  facet_wrap(~Feature, scales = "free_x") +
+  labs(title = "Dyspnea vs. Numeric Features",
+       subtitle = "Cumulative Distribution")
+```
+
+```{r, fig.height=14, fig.width=16}
+grafico_de_barras_das_vars_continuas <- 
+  function(dados) {
+    dados |>  
+    select(c(where(is.numeric), dispneia)) |> 
+    pivot_longer(-dispneia,
+                 names_to = "Feature",
+                 values_to = "Value") |> 
+    dplyr::group_by(Feature) |> 
+    dplyr::mutate(
+      Value = factor(dplyr::ntile(Value, 10),
+                     levels = 1:10)
+    ) |> 
+    dplyr::count(dispneia, 
+                 Feature,
+                 Value) |> 
+    ggplot(aes(y = (Value),
+               x = n,
+               fill = dispneia)) +
+    geom_col(position = "fill") +
+    geom_label(aes(label = n),
+               position = position_fill(vjust = 0.5)) +
+    facet_wrap(~Feature,
+               scales = "free_y",
+               ncol = 3) +
+    ggtitle("Dyspnea vs. Numeric Features")
+}
+
+grafico_de_barras_das_vars_continuas(dispneia_train)
+```
+
+## Checking the distribution of categorical features
+```{r, fig.height=8}
+contagens <- 
+  dispneia_train |>  
+  select(c(where(is.character),
+           dispneia)) |> 
+  pivot_longer(-dispneia,
+               names_to = "Feature",
+               values_to = "Value") |> 
+  count(dispneia,
+        Feature,
+        Value)
+
+# tabela
+contagens |> 
+  pivot_wider(names_from = dispneia,
+              values_from = n) |> 
+  DT::datatable()
+```
+
+```{r, fig.height=16, fig.width=16}
+contagens |> 
+  ggplot(aes(y = Value,
+             x = n,
+             fill = dispneia)) +
+  geom_col(position = "fill") +
+  geom_label(aes(label = n),
+             position = position_fill(vjust = 0.5)) +
+  facet_wrap(~Feature,
+             scales = "free_y",
+             ncol = 3) +
+  ggtitle("Dyspnea vs. Categorical Features")
+```
+
+## Preprocessing and Feature Engineering Steps using Recipes package
+# Recipe
+```{r}
+dispneia_recipe <-
+  recipe(formula = dispneia ~ ., dispneia_train) |>
+  step_normalize(all_numeric_predictors()) |> # normalize all continuous features
+  step_corr(all_numeric_predictors(), threshold = .8) |>  # multicollinearity <- r > 0.8
+  step_impute_median(all_numeric_predictors()) |>  # Processing missing continuous data - imputing median 
+  step_impute_mode(all_nominal_predictors()) |> # Processing missing categorical data - imputing more frequent class
+  step_zv(all_predictors()) |>  # removing variables that contain only zero (zero variance filter)
+  step_dummy(all_nominal_predictors()) # dummy - nominal predictors
+
+
+# Checking the result of the recipe (and whether the steps worked!)
+dispneia_recipe |> 
+    prep() |> 
+    bake(new_data = dispneia_train) |> 
+    glimpse()
+```
+
+## Definition of cross-validation
+```{r}
+dispneia_resamples <- 
+  vfold_cv(dispneia_train,
+           v = 5, 
+           strata = dispneia) # 3 folds due to limited dataset
+
+dispneia_resamples$splits
+```
+
+## Modeling

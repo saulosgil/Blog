@@ -4,7 +4,7 @@ categories:
 - Theme Features
 - R
 - package
-date: "2022-04-27"
+date: "2024-01-06"
 draft: false
 excerpt: This project aims to model machine learning algoritms to predict dyspnea in COVID-19 survivors 6-9 months after hospital discharge. 
   websites.
@@ -13,8 +13,850 @@ layout: single-sidebar
 subtitle: "In progress"
 tags:
 - hugo-site
-title: Machine learning for Predicting Dispneia in COVID-19 Survivors
+title: Using XGboost to Predict Dyspnea in COVID-19 Survivors
 ---
 
+<script src="{{< blogdown/postref >}}index_files/htmlwidgets/htmlwidgets.js"></script>
+<link href="{{< blogdown/postref >}}index_files/datatables-css/datatables-crosstalk.css" rel="stylesheet" />
+<script src="{{< blogdown/postref >}}index_files/datatables-binding/datatables.js"></script>
+<script src="{{< blogdown/postref >}}index_files/jquery/jquery-3.6.0.min.js"></script>
+<link href="{{< blogdown/postref >}}index_files/dt-core/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="{{< blogdown/postref >}}index_files/dt-core/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="{{< blogdown/postref >}}index_files/dt-core/js/jquery.dataTables.min.js"></script>
+<link href="{{< blogdown/postref >}}index_files/crosstalk/css/crosstalk.min.css" rel="stylesheet" />
+<script src="{{< blogdown/postref >}}index_files/crosstalk/js/crosstalk.min.js"></script>
 
 
+<div id="packages" class="section level2">
+<h2>Packages</h2>
+<pre class="r"><code># Pacotes
+library(tidyverse)
+library(tidymodels)
+library(GGally)
+library(DataExplorer)
+library(vip)
+library(doParallel)</code></pre>
+</div>
+<div id="reading-dataset" class="section level2">
+<h2>Reading dataset</h2>
+<pre class="r"><code># Lendo a base
+dispneia &lt;- read.csv2(&#39;df_ajustada.csv&#39;)</code></pre>
+</div>
+<div id="spliting-dataset---traintest" class="section level2">
+<h2>Spliting dataset - Train/Test</h2>
+<pre class="r"><code>set.seed(32)
+
+dispneia_initial_split &lt;- initial_split(dispneia,
+                                        prop = 0.8,
+                                        strata = &quot;dispneia&quot;)
+dispneia_initial_split</code></pre>
+<pre><code>## &lt;Training/Testing/Total&gt;
+## &lt;592/149/741&gt;</code></pre>
+<pre class="r"><code># train and test datasets
+dispneia_train &lt;- training(dispneia_initial_split)
+
+dispneia_test &lt;- testing(dispneia_initial_split)</code></pre>
+</div>
+<div id="exploratory-analysis" class="section level2">
+<h2>Exploratory analysis</h2>
+<div id="overview" class="section level3">
+<h3>Overview</h3>
+<pre class="r"><code>skimr::skim(dispneia_train)</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-4">Table 1: </span>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td align="left">Name</td>
+<td align="left">dispneia_train</td>
+</tr>
+<tr class="even">
+<td align="left">Number of rows</td>
+<td align="left">592</td>
+</tr>
+<tr class="odd">
+<td align="left">Number of columns</td>
+<td align="left">47</td>
+</tr>
+<tr class="even">
+<td align="left">_______________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Column type frequency:</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">character</td>
+<td align="left">42</td>
+</tr>
+<tr class="odd">
+<td align="left">numeric</td>
+<td align="left">5</td>
+</tr>
+<tr class="even">
+<td align="left">________________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Group variables</td>
+<td align="left">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table style="width:100%;">
+<colgroup>
+<col width="40%" />
+<col width="10%" />
+<col width="14%" />
+<col width="4%" />
+<col width="4%" />
+<col width="6%" />
+<col width="9%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">min</th>
+<th align="right">max</th>
+<th align="right">empty</th>
+<th align="right">n_unique</th>
+<th align="right">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">idade</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">5</td>
+<td align="right">9</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">sexo</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">4</td>
+<td align="right">6</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">adm_uti</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">tempo_uti</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">9</td>
+<td align="right">16</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">vmi</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">tempo_vmi</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">9</td>
+<td align="right">17</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">dispneia</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">tosse</td>
+<td align="right">13</td>
+<td align="right">0.98</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">fraqueza</td>
+<td align="right">7</td>
+<td align="right">0.99</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">dific_caminhar</td>
+<td align="right">7</td>
+<td align="right">0.99</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">angina</td>
+<td align="right">21</td>
+<td align="right">0.96</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">dor_articular</td>
+<td align="right">12</td>
+<td align="right">0.98</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">dor_abdominal</td>
+<td align="right">12</td>
+<td align="right">0.98</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">diarreia</td>
+<td align="right">14</td>
+<td align="right">0.98</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">nausea</td>
+<td align="right">9</td>
+<td align="right">0.98</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">perda_consciencia</td>
+<td align="right">12</td>
+<td align="right">0.98</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">inapetencia</td>
+<td align="right">7</td>
+<td align="right">0.99</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">parestesia</td>
+<td align="right">8</td>
+<td align="right">0.99</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">obstrucao_nasal</td>
+<td align="right">16</td>
+<td align="right">0.97</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">perda_paladar</td>
+<td align="right">25</td>
+<td align="right">0.96</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">anosmia</td>
+<td align="right">18</td>
+<td align="right">0.97</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">fadiga</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">cefaleia</td>
+<td align="right">7</td>
+<td align="right">0.99</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">trail_making_a_persistent_fup_incident</td>
+<td align="right">73</td>
+<td align="right">0.88</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">perda_memoria</td>
+<td align="right">47</td>
+<td align="right">0.92</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">TEPT</td>
+<td align="right">11</td>
+<td align="right">0.98</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">perda_auditiva</td>
+<td align="right">11</td>
+<td align="right">0.98</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">ruido_ouvido</td>
+<td align="right">10</td>
+<td align="right">0.98</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">vertigem</td>
+<td align="right">9</td>
+<td align="right">0.98</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">edema</td>
+<td align="right">14</td>
+<td align="right">0.98</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">nocturia</td>
+<td align="right">15</td>
+<td align="right">0.97</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">dor_corpo</td>
+<td align="right">9</td>
+<td align="right">0.98</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">insonia</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">depressao</td>
+<td align="right">64</td>
+<td align="right">0.89</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">ansiedade</td>
+<td align="right">64</td>
+<td align="right">0.89</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">tempo_internacao</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">9</td>
+<td align="right">11</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">tabagismo</td>
+<td align="right">4</td>
+<td align="right">0.99</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">obesidade</td>
+<td align="right">2</td>
+<td align="right">1.00</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">hipertensao</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">diabetes</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">gravidade_adm</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">5</td>
+<td align="right">8</td>
+<td align="right">0</td>
+<td align="right">4</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">nivel_atf</td>
+<td align="right">3</td>
+<td align="right">0.99</td>
+<td align="right">5</td>
+<td align="right">7</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table style="width:100%;">
+<colgroup>
+<col width="23%" />
+<col width="11%" />
+<col width="15%" />
+<col width="7%" />
+<col width="6%" />
+<col width="3%" />
+<col width="6%" />
+<col width="4%" />
+<col width="7%" />
+<col width="5%" />
+<col width="6%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">p0</th>
+<th align="right">p25</th>
+<th align="right">p50</th>
+<th align="right">p75</th>
+<th align="right">p100</th>
+<th align="left">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">espiro_cvf_pred</td>
+<td align="right">86</td>
+<td align="right">0.85</td>
+<td align="right">83.46</td>
+<td align="right">16.51</td>
+<td align="right">22</td>
+<td align="right">73.00</td>
+<td align="right">84</td>
+<td align="right">94.00</td>
+<td align="right">132</td>
+<td align="left">▁▂▇▆▁</td>
+</tr>
+<tr class="even">
+<td align="left">espiro_cvf_vef1_pred</td>
+<td align="right">86</td>
+<td align="right">0.85</td>
+<td align="right">101.78</td>
+<td align="right">9.91</td>
+<td align="right">43</td>
+<td align="right">97.00</td>
+<td align="right">103</td>
+<td align="right">107.00</td>
+<td align="right">129</td>
+<td align="left">▁▁▂▇▂</td>
+</tr>
+<tr class="odd">
+<td align="left">espiro_vef_pred</td>
+<td align="right">86</td>
+<td align="right">0.85</td>
+<td align="right">84.90</td>
+<td align="right">17.61</td>
+<td align="right">21</td>
+<td align="right">75.00</td>
+<td align="right">87</td>
+<td align="right">96.00</td>
+<td align="right">140</td>
+<td align="left">▁▂▇▅▁</td>
+</tr>
+<tr class="even">
+<td align="left">espiro_pefr_pred</td>
+<td align="right">87</td>
+<td align="right">0.85</td>
+<td align="right">74.68</td>
+<td align="right">22.88</td>
+<td align="right">9</td>
+<td align="right">60.00</td>
+<td align="right">76</td>
+<td align="right">91.00</td>
+<td align="right">133</td>
+<td align="left">▁▃▇▆▂</td>
+</tr>
+<tr class="odd">
+<td align="left">espiro_fef_pred</td>
+<td align="right">86</td>
+<td align="right">0.85</td>
+<td align="right">101.74</td>
+<td align="right">39.00</td>
+<td align="right">0</td>
+<td align="right">75.25</td>
+<td align="right">100</td>
+<td align="right">125.75</td>
+<td align="right">282</td>
+<td align="left">▂▇▆▁▁</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="missing-values" class="section level3">
+<h3>Missing values</h3>
+<pre class="r"><code>plot_missing(dispneia_train)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-5-1.png" width="1344" /></p>
+</div>
+</div>
+<div id="checking-the-correlation-and-distribution-of-numerical-features" class="section level2">
+<h2>Checking the correlation and distribution of numerical features</h2>
+<pre class="r"><code>dispneia_train |&gt;  
+  select(where(is.numeric)) |&gt;  
+  cor(use = &quot;pairwise.complete.obs&quot;) |&gt; 
+  corrplot::corrplot(method = &quot;number&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="100%" /></p>
+<pre class="r"><code>dispneia_train |&gt;  
+  select(where(is.numeric), dispneia) |&gt; 
+  ggpairs(aes(colour = dispneia))</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-7-1.png" width="1344" /></p>
+<pre class="r"><code>dispneia_train |&gt;  
+  select(c(where(is.numeric), dispneia)) |&gt; 
+  pivot_longer(-dispneia, 
+               names_to = &quot;Feature&quot;,
+               values_to = &quot;Value&quot;) |&gt; 
+  ggplot(aes(y = dispneia, 
+             x = Value, 
+             fill = dispneia)) +
+  geom_boxplot() +
+  facet_wrap(~Feature,
+             scales = &quot;free_x&quot;) +
+  ggtitle(&quot;Dyspnea vs. Numeric Features&quot;)</code></pre>
+<pre><code>## Warning: Removed 431 rows containing non-finite values (`stat_boxplot()`).</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-8-1.png" width="1536" /></p>
+<pre class="r"><code>dispneia_train |&gt;  
+  select(c(where(is.numeric), dispneia)) |&gt; 
+  pivot_longer(-dispneia, 
+               names_to = &quot;Feature&quot;,
+               values_to = &quot;Value&quot;) |&gt; 
+  ggplot(aes(x = Value, 
+             colour = dispneia)) +
+  stat_ecdf() +
+  facet_wrap(~Feature, scales = &quot;free_x&quot;) +
+  labs(title = &quot;Dyspnea vs. Numeric Features&quot;,
+       subtitle = &quot;Cumulative Distribution&quot;)</code></pre>
+<pre><code>## Warning: Removed 431 rows containing non-finite values (`stat_ecdf()`).</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-9-1.png" width="1536" /></p>
+<pre class="r"><code>grafico_de_barras_das_vars_continuas &lt;- 
+  function(dados) {
+    dados |&gt;  
+    select(c(where(is.numeric), dispneia)) |&gt; 
+    pivot_longer(-dispneia,
+                 names_to = &quot;Feature&quot;,
+                 values_to = &quot;Value&quot;) |&gt; 
+    dplyr::group_by(Feature) |&gt; 
+    dplyr::mutate(
+      Value = factor(dplyr::ntile(Value, 10),
+                     levels = 1:10)
+    ) |&gt; 
+    dplyr::count(dispneia, 
+                 Feature,
+                 Value) |&gt; 
+    ggplot(aes(y = (Value),
+               x = n,
+               fill = dispneia)) +
+    geom_col(position = &quot;fill&quot;) +
+    geom_label(aes(label = n),
+               position = position_fill(vjust = 0.5)) +
+    facet_wrap(~Feature,
+               scales = &quot;free_y&quot;,
+               ncol = 3) +
+    ggtitle(&quot;Dyspnea vs. Numeric Features&quot;)
+}
+
+grafico_de_barras_das_vars_continuas(dispneia_train)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-10-1.png" width="1536" /></p>
+</div>
+<div id="checking-the-distribution-of-categorical-features" class="section level2">
+<h2>Checking the distribution of categorical features</h2>
+<pre class="r"><code>contagens &lt;- 
+  dispneia_train |&gt;  
+  select(c(where(is.character),
+           dispneia)) |&gt; 
+  pivot_longer(-dispneia,
+               names_to = &quot;Feature&quot;,
+               values_to = &quot;Value&quot;) |&gt; 
+  count(dispneia,
+        Feature,
+        Value)
+
+# tabela
+contagens |&gt; 
+  pivot_wider(names_from = dispneia,
+              values_from = n) |&gt; 
+  DT::datatable()</code></pre>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-1" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76","77","78","79","80","81","82","83","84","85","86","87","88","89","90","91","92","93","94","95","96","97","98","99","100","101","102","103","104","105","106","107","108","109","110","111","112","113","114","115"],["TEPT","TEPT","TEPT","adm_uti","adm_uti","angina","angina","angina","anosmia","anosmia","anosmia","ansiedade","ansiedade","ansiedade","cefaleia","cefaleia","cefaleia","depressao","depressao","depressao","diabetes","diabetes","diarreia","diarreia","diarreia","dific_caminhar","dific_caminhar","dific_caminhar","dor_abdominal","dor_abdominal","dor_abdominal","dor_articular","dor_articular","dor_articular","dor_corpo","dor_corpo","dor_corpo","edema","edema","edema","fadiga","fadiga","fraqueza","fraqueza","fraqueza","gravidade_adm","gravidade_adm","gravidade_adm","gravidade_adm","hipertensao","hipertensao","idade","idade","inapetencia","inapetencia","inapetencia","insonia","insonia","nausea","nausea","nausea","nivel_atf","nivel_atf","nivel_atf","nocturia","nocturia","nocturia","obesidade","obesidade","obesidade","obstrucao_nasal","obstrucao_nasal","obstrucao_nasal","parestesia","parestesia","parestesia","perda_auditiva","perda_auditiva","perda_auditiva","perda_consciencia","perda_consciencia","perda_consciencia","perda_memoria","perda_memoria","perda_memoria","perda_paladar","perda_paladar","perda_paladar","ruido_ouvido","ruido_ouvido","ruido_ouvido","sexo","sexo","tabagismo","tabagismo","tabagismo","tempo_internacao","tempo_internacao","tempo_uti","tempo_uti","tempo_uti","tempo_vmi","tempo_vmi","tempo_vmi","tosse","tosse","tosse","trail_making_a_persistent_fup_incident","trail_making_a_persistent_fup_incident","trail_making_a_persistent_fup_incident","vertigem","vertigem","vertigem","vmi","vmi"],["No","Yes",null,"No","Yes","No","Yes",null,"No","Yes",null,"No","Yes",null,"No","Yes",null,"No","Yes",null,"No","Yes","No","Yes",null,"No","Yes",null,"No","Yes",null,"No","Yes",null,"No","Yes",null,"No","Yes",null,"No","Yes","No","Yes",null,"baixa","critico","elevada","moderada","No","Yes","idoso","nao-idoso","No","Yes",null,"No","Yes","No","Yes",null,"ativo","inativo",null,"No","Yes",null,"No","Yes",null,"No","Yes",null,"No","Yes",null,"No","Yes",null,"No","Yes",null,"No","Yes",null,"No","Yes",null,"No","Yes",null,"female","male","No","Yes",null,"&gt; 15 dias","ate 15 dias","&gt; 15 dias","ate 15 dias","não foi para UTI","&gt; 15 dias","Não fez uso de VM","ate 15 dias","No","Yes",null,"No","Yes",null,"No","Yes",null,"No","Yes"],[280,129,8,160,257,336,65,16,338,64,15,302,70,45,372,40,5,311,61,45,273,144,386,17,14,368,44,5,359,49,9,276,129,12,298,110,9,346,59,12,314,103,362,50,5,52,178,15,172,181,236,161,256,381,30,6,309,108,398,10,9,173,242,2,318,86,13,343,73,1,348,57,12,346,65,6,353,53,11,399,12,6,280,103,34,329,68,20,355,52,10,177,240,267,148,2,188,229,81,176,160,27,259,131,337,67,13,243,122,52,281,127,9,239,178],[93,79,3,82,93,125,45,5,115,57,3,82,74,19,152,21,2,97,59,19,109,66,155,20,null,147,26,2,139,33,3,65,110,null,91,84,null,128,45,2,51,124,140,33,2,18,63,8,86,63,112,78,97,126,48,1,89,86,165,10,null,43,131,1,119,54,2,133,41,1,134,37,4,138,35,2,139,36,null,162,7,6,72,90,13,108,62,5,139,36,null,108,67,99,74,2,70,105,26,67,82,12,125,38,131,44,null,78,76,21,91,84,null,112,63]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Feature<\/th>\n      <th>Value<\/th>\n      <th>No<\/th>\n      <th>Yes<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[3,4]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>contagens |&gt; 
+  ggplot(aes(y = Value,
+             x = n,
+             fill = dispneia)) +
+  geom_col(position = &quot;fill&quot;) +
+  geom_label(aes(label = n),
+             position = position_fill(vjust = 0.5)) +
+  facet_wrap(~Feature,
+             scales = &quot;free_y&quot;,
+             ncol = 3) +
+  ggtitle(&quot;Dyspnea vs. Categorical Features&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-12-1.png" width="1536" /></p>
+</div>
+<div id="preprocessing-and-feature-engineering-steps-using-recipes-package" class="section level2">
+<h2>Preprocessing and Feature Engineering Steps using Recipes package</h2>
+</div>
+<div id="recipe" class="section level1">
+<h1>Recipe</h1>
+<pre class="r"><code>dispneia_recipe &lt;-
+  recipe(formula = dispneia ~ ., dispneia_train) |&gt;
+  step_normalize(all_numeric_predictors()) |&gt; # normalize all continuous features
+  step_corr(all_numeric_predictors(), threshold = .8) |&gt;  # multicollinearity &lt;- r &gt; 0.8
+  step_impute_median(all_numeric_predictors()) |&gt;  # Processing missing continuous data - imputing median 
+  step_impute_mode(all_nominal_predictors()) |&gt; # Processing missing categorical data - imputing more frequent class
+  step_zv(all_predictors()) |&gt;  # removing variables that contain only zero (zero variance filter)
+  step_dummy(all_nominal_predictors()) # dummy - nominal predictors
+
+
+# Checking the result of the recipe (and whether the steps worked!)
+dispneia_recipe |&gt; 
+    prep() |&gt; 
+    bake(new_data = dispneia_train) |&gt; 
+    glimpse()</code></pre>
+<pre><code>## Rows: 592
+## Columns: 50
+## $ espiro_cvf_pred                            &lt;dbl&gt; 0.75971560, -0.93614868, -1…
+## $ espiro_cvf_vef1_pred                       &lt;dbl&gt; 0.02173529, -0.18006391, 0.…
+## $ espiro_pefr_pred                           &lt;dbl&gt; -0.5976043, -2.0833943, 0.2…
+## $ espiro_fef_pred                            &lt;dbl&gt; 0.51947489, -1.17275315, -0…
+## $ dispneia                                   &lt;fct&gt; No, No, No, No, No, No, No,…
+## $ idade_nao.idoso                            &lt;dbl&gt; 1, 0, 1, 0, 1, 0, 1, 0, 0, …
+## $ sexo_male                                  &lt;dbl&gt; 1, 0, 1, 1, 1, 1, 0, 1, 0, …
+## $ adm_uti_Yes                                &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+## $ tempo_uti_ate.15.dias                      &lt;dbl&gt; 0, 1, 0, 1, 0, 0, 0, 1, 1, …
+## $ tempo_uti_não.foi.para.UTI                 &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ vmi_Yes                                    &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 0, …
+## $ tempo_vmi_ate.15.dias                      &lt;dbl&gt; 0, 1, 0, 1, 0, 1, 1, 0, 0, …
+## $ tempo_vmi_Não.fez.uso.de.VM                &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 1, 1, …
+## $ tosse_Yes                                  &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ fraqueza_Yes                               &lt;dbl&gt; 1, 0, 1, 0, 0, 0, 0, 0, 0, …
+## $ dific_caminhar_Yes                         &lt;dbl&gt; 0, 0, 1, 0, 0, 0, 0, 0, 0, …
+## $ angina_Yes                                 &lt;dbl&gt; 0, 0, 1, 0, 0, 0, 1, 0, 0, …
+## $ dor_articular_Yes                          &lt;dbl&gt; 1, 1, 1, 0, 0, 0, 1, 0, 0, …
+## $ dor_abdominal_Yes                          &lt;dbl&gt; 0, 0, 0, 1, 0, 0, 0, 0, 0, …
+## $ diarreia_Yes                               &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ nausea_Yes                                 &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ perda_consciencia_Yes                      &lt;dbl&gt; 0, 1, 0, 0, 0, 0, 0, 0, 0, …
+## $ inapetencia_Yes                            &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ parestesia_Yes                             &lt;dbl&gt; 1, 0, 1, 0, 0, 1, 0, 0, 0, …
+## $ obstrucao_nasal_Yes                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 1, 0, …
+## $ perda_paladar_Yes                          &lt;dbl&gt; 1, 0, 0, 1, 0, 0, 0, 0, 0, …
+## $ anosmia_Yes                                &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ fadiga_Yes                                 &lt;dbl&gt; 0, 1, 0, 1, 1, 0, 1, 0, 0, …
+## $ cefaleia_Yes                               &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ trail_making_a_persistent_fup_incident_Yes &lt;dbl&gt; 1, 0, 0, 0, 0, 0, 1, 0, 0, …
+## $ perda_memoria_Yes                          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 1, 0, 1, …
+## $ TEPT_Yes                                   &lt;dbl&gt; 0, 0, 1, 1, 0, 0, 1, 0, 0, …
+## $ perda_auditiva_Yes                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ ruido_ouvido_Yes                           &lt;dbl&gt; 0, 0, 1, 0, 0, 0, 1, 0, 0, …
+## $ vertigem_Yes                               &lt;dbl&gt; 0, 1, 1, 1, 0, 0, 0, 0, 0, …
+## $ edema_Yes                                  &lt;dbl&gt; 1, 0, 0, 0, 0, 1, 1, 0, 0, …
+## $ nocturia_Yes                               &lt;dbl&gt; 0, 0, 0, 0, 0, 1, 1, 1, 0, …
+## $ dor_corpo_Yes                              &lt;dbl&gt; 0, 0, 0, 0, 1, 1, 1, 1, 1, …
+## $ insonia_Yes                                &lt;dbl&gt; 0, 1, 0, 0, 0, 0, 1, 0, 1, …
+## $ depressao_Yes                              &lt;dbl&gt; 0, 0, 0, 1, 0, 0, 0, 0, 0, …
+## $ ansiedade_Yes                              &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ tempo_internacao_ate.15.dias               &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 1, …
+## $ tabagismo_Yes                              &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 1, 0, 0, …
+## $ obesidade_Yes                              &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ hipertensao_Yes                            &lt;dbl&gt; 1, 1, 0, 1, 1, 1, 1, 0, 1, …
+## $ diabetes_Yes                               &lt;dbl&gt; 1, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ gravidade_adm_critico                      &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 0, …
+## $ gravidade_adm_elevada                      &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ gravidade_adm_moderada                     &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 1, …
+## $ nivel_atf_inativo                          &lt;dbl&gt; 0, 1, 1, 1, 0, 1, 0, 1, 1, …</code></pre>
+<div id="definition-of-cross-validation" class="section level2">
+<h2>Definition of cross-validation</h2>
+<pre class="r"><code>dispneia_resamples &lt;- 
+  vfold_cv(dispneia_train,
+           v = 5, 
+           strata = dispneia) # 3 folds due to limited dataset
+
+dispneia_resamples$splits</code></pre>
+<pre><code>## [[1]]
+## &lt;Analysis/Assess/Total&gt;
+## &lt;473/119/592&gt;
+## 
+## [[2]]
+## &lt;Analysis/Assess/Total&gt;
+## &lt;473/119/592&gt;
+## 
+## [[3]]
+## &lt;Analysis/Assess/Total&gt;
+## &lt;474/118/592&gt;
+## 
+## [[4]]
+## &lt;Analysis/Assess/Total&gt;
+## &lt;474/118/592&gt;
+## 
+## [[5]]
+## &lt;Analysis/Assess/Total&gt;
+## &lt;474/118/592&gt;</code></pre>
+</div>
+<div id="modeling" class="section level2">
+<h2>Modeling</h2>
+</div>
+</div>
