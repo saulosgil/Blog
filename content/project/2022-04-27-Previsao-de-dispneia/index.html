@@ -6,7 +6,7 @@ categories:
 - package
 date: "2024-01-06"
 draft: false
-excerpt: This project aims to model machine learning algoritms to predict dyspnea in COVID-19 survivors 6-9 months after hospital discharge. 
+excerpt: This project used XGboost to predict dyspnea in COVID-19 survivors 6-9 months after hospital discharge. 
   websites.
 featured: true
 layout: single-sidebar
@@ -27,6 +27,9 @@ title: Using XGboost to Predict Dyspnea in COVID-19 Survivors
 <script src="{{< blogdown/postref >}}index_files/crosstalk/js/crosstalk.min.js"></script>
 
 
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>xxxxxxxxxxx</p>
 <div id="packages" class="section level2">
 <h2>Packages</h2>
 <pre class="r"><code># Pacotes
@@ -759,6 +762,7 @@ contagens |&gt;
 <div id="preprocessing-and-feature-engineering-steps-using-recipes-package" class="section level2">
 <h2>Preprocessing and Feature Engineering Steps using Recipes package</h2>
 </div>
+</div>
 <div id="recipe" class="section level1">
 <h1>Recipe</h1>
 <pre class="r"><code>dispneia_recipe &lt;-
@@ -859,4 +863,509 @@ dispneia_resamples$splits</code></pre>
 <div id="modeling" class="section level2">
 <h2>Modeling</h2>
 </div>
+<div id="xgboost" class="section level2">
+<h2>XGBoost</h2>
+<div id="step-1---number-of-trees-trees-and-learn-rate-learn_rate" class="section level3">
+<h3>Step 1 - Number of trees (trees) and learn rate (learn_rate)</h3>
+</div>
+<div id="model" class="section level3">
+<h3>Model</h3>
+<pre class="r"><code># Modelo
+dispneia_xgb_model &lt;-
+  boost_tree(
+  min_n = 15,
+  mtry = 0.8,
+  trees = tune(),
+  tree_depth = 5,
+  learn_rate = tune(),
+  loss_reduction = 0,
+  sample_size = 0.8
+) |&gt;
+  set_mode(&quot;classification&quot;) |&gt;
+  set_engine(&quot;xgboost&quot;, count = FALSE)</code></pre>
+</div>
+<div id="workflow" class="section level3">
+<h3>Workflow</h3>
+<pre class="r"><code># Workflow
+dispneia_xgb_wf &lt;- 
+  workflow() |&gt; 
+  add_model(dispneia_xgb_model) |&gt; 
+  add_recipe(dispneia_recipe)</code></pre>
+</div>
+<div id="tuning" class="section level3">
+<h3>Tuning</h3>
+<pre class="r"><code># Tune
+dispneia_grid_xgb &lt;-
+  expand.grid(
+    trees = seq(25, 800, 25),
+    learn_rate = seq(0.01, 0.4,0.1)
+)
+
+dispneia_grid_xgb |&gt; 
+  DT::datatable()</code></pre>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-2" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76","77","78","79","80","81","82","83","84","85","86","87","88","89","90","91","92","93","94","95","96","97","98","99","100","101","102","103","104","105","106","107","108","109","110","111","112","113","114","115","116","117","118","119","120","121","122","123","124","125","126","127","128"],[25,50,75,100,125,150,175,200,225,250,275,300,325,350,375,400,425,450,475,500,525,550,575,600,625,650,675,700,725,750,775,800,25,50,75,100,125,150,175,200,225,250,275,300,325,350,375,400,425,450,475,500,525,550,575,600,625,650,675,700,725,750,775,800,25,50,75,100,125,150,175,200,225,250,275,300,325,350,375,400,425,450,475,500,525,550,575,600,625,650,675,700,725,750,775,800,25,50,75,100,125,150,175,200,225,250,275,300,325,350,375,400,425,450,475,500,525,550,575,600,625,650,675,700,725,750,775,800],[0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.21,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001,0.3100000000000001]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>trees<\/th>\n      <th>learn_rate<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>doParallel::registerDoParallel(4)
+
+dispneia_xgb_tune_grid &lt;-
+  tune_grid(
+  dispneia_xgb_wf,
+  resamples = dispneia_resamples,
+  grid = dispneia_grid_xgb,
+  metrics = metric_set(roc_auc, accuracy, sensitivity, specificity),
+  verbose = TRUE
+  )</code></pre>
+<pre class="r"><code>autoplot(dispneia_xgb_tune_grid) +
+  theme_bw() +
+  theme(legend.position = &quot;top&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-19-1.png" width="100%" /></p>
+<pre class="r"><code>collect_metrics(dispneia_xgb_tune_grid) |&gt; 
+  filter(.metric == &quot;roc_auc&quot;) |&gt; 
+  filter(mean == max(mean))</code></pre>
+<pre><code>## # A tibble: 1 × 8
+##   trees learn_rate .metric .estimator  mean     n std_err .config               
+##   &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;                 
+## 1   100       0.11 roc_auc binary     0.810     5  0.0163 Preprocessor1_Model036</code></pre>
+<pre class="r"><code>dispneia_xgb_tune_grid |&gt; 
+  select_best(metric = &quot;roc_auc&quot;)</code></pre>
+<pre><code>## # A tibble: 1 × 3
+##   trees learn_rate .config               
+##   &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;                 
+## 1   100       0.11 Preprocessor1_Model036</code></pre>
+<pre class="r"><code>show_best(dispneia_xgb_tune_grid, n = 6)</code></pre>
+<pre><code>## Warning: No value of `metric` was given; metric &#39;roc_auc&#39; will be used.</code></pre>
+<pre><code>## # A tibble: 6 × 8
+##   trees learn_rate .metric .estimator  mean     n std_err .config               
+##   &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;                 
+## 1   100       0.11 roc_auc binary     0.810     5  0.0163 Preprocessor1_Model036
+## 2   125       0.11 roc_auc binary     0.810     5  0.0161 Preprocessor1_Model037
+## 3    75       0.11 roc_auc binary     0.810     5  0.0163 Preprocessor1_Model035
+## 4   700       0.01 roc_auc binary     0.810     5  0.0166 Preprocessor1_Model028
+## 5   750       0.01 roc_auc binary     0.809     5  0.0162 Preprocessor1_Model030
+## 6   775       0.01 roc_auc binary     0.809     5  0.0164 Preprocessor1_Model031</code></pre>
+<pre class="r"><code>dispneia_best_step1 &lt;-
+  dispneia_xgb_tune_grid |&gt;
+  select_best(metric = &quot;roc_auc&quot;)
+
+# best hiperparameters
+glue::glue(&quot;The best number of trees was {dispneia_best_step1$trees} and learn_rate was {dispneia_best_step1$learn_rate}.&quot;)</code></pre>
+<pre><code>## The best number of trees was 100 and learn_rate was 0.11.</code></pre>
+</div>
+<div id="step-2---minimal-node-size-min_n-and-depth-tree-tree_depth" class="section level3">
+<h3>Step 2 - Minimal node size (min_n) and depth tree (tree_depth)</h3>
+</div>
+<div id="model-1" class="section level3">
+<h3>Model</h3>
+<pre class="r"><code># Modelo
+dispneia_xgb_model &lt;-
+  boost_tree(
+  min_n = tune(),
+  mtry = 0.8,
+  trees = 25,
+  tree_depth = tune(),
+  learn_rate = 0.31,
+  loss_reduction = 0,
+  sample_size = 0.8
+) |&gt;
+  set_mode(&quot;classification&quot;) |&gt;
+  set_engine(&quot;xgboost&quot;, count = FALSE)</code></pre>
+</div>
+<div id="workflow-1" class="section level3">
+<h3>Workflow</h3>
+<pre class="r"><code># Workflow
+dispneia_xgb_wf &lt;- 
+  workflow() |&gt; 
+  add_model(dispneia_xgb_model) |&gt; 
+  add_recipe(dispneia_recipe)</code></pre>
+</div>
+<div id="tuning-1" class="section level3">
+<h3>Tuning</h3>
+<pre class="r"><code># Tune - min_n and tree_depth
+dispneia_grid_xgb &lt;-
+  expand.grid(
+    min_n = seq(1,16,2),
+    tree_depth = seq(1,17,4)
+)
+
+dispneia_grid_xgb |&gt; 
+  DT::datatable()</code></pre>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-3" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-3">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40"],[1,3,5,7,9,11,13,15,1,3,5,7,9,11,13,15,1,3,5,7,9,11,13,15,1,3,5,7,9,11,13,15,1,3,5,7,9,11,13,15],[1,1,1,1,1,1,1,1,5,5,5,5,5,5,5,5,9,9,9,9,9,9,9,9,13,13,13,13,13,13,13,13,17,17,17,17,17,17,17,17]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>min_n<\/th>\n      <th>tree_depth<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>doParallel::registerDoParallel(4)
+
+dispneia_xgb_tune_grid &lt;-
+  tune_grid(
+  dispneia_xgb_wf,
+  resamples = dispneia_resamples,
+  grid = dispneia_grid_xgb,
+  metrics = metric_set(roc_auc, accuracy, sensitivity, specificity),
+  verbose = TRUE
+  )</code></pre>
+<pre class="r"><code>autoplot(dispneia_xgb_tune_grid) +
+  theme_bw() +
+  theme(legend.position = &quot;top&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-24-1.png" width="100%" /></p>
+<pre class="r"><code>collect_metrics(dispneia_xgb_tune_grid) |&gt; 
+  filter(.metric == &quot;roc_auc&quot;) |&gt; 
+  filter(mean == max(mean))</code></pre>
+<pre><code>## # A tibble: 1 × 8
+##   min_n tree_depth .metric .estimator  mean     n std_err .config              
+##   &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;                
+## 1     5          1 roc_auc binary     0.818     5  0.0209 Preprocessor1_Model03</code></pre>
+<pre class="r"><code>dispneia_xgb_tune_grid |&gt; 
+  select_best(metric = &quot;roc_auc&quot;)</code></pre>
+<pre><code>## # A tibble: 1 × 3
+##   min_n tree_depth .config              
+##   &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;                
+## 1     5          1 Preprocessor1_Model03</code></pre>
+<pre class="r"><code>show_best(dispneia_xgb_tune_grid, n = 6)</code></pre>
+<pre><code>## Warning: No value of `metric` was given; metric &#39;roc_auc&#39; will be used.</code></pre>
+<pre><code>## # A tibble: 6 × 8
+##   min_n tree_depth .metric .estimator  mean     n std_err .config              
+##   &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;                
+## 1     5          1 roc_auc binary     0.818     5  0.0209 Preprocessor1_Model03
+## 2     7          1 roc_auc binary     0.814     5  0.0213 Preprocessor1_Model04
+## 3     9         13 roc_auc binary     0.813     5  0.0161 Preprocessor1_Model29
+## 4     9          5 roc_auc binary     0.813     5  0.0148 Preprocessor1_Model13
+## 5    15         13 roc_auc binary     0.813     5  0.0153 Preprocessor1_Model32
+## 6     1          1 roc_auc binary     0.813     5  0.0213 Preprocessor1_Model01</code></pre>
+<pre class="r"><code>dispneia_best_step2 &lt;-
+  dispneia_xgb_tune_grid |&gt;
+  select_best(metric = &quot;roc_auc&quot;)
+
+# best hiperparameters
+glue::glue(&quot;The best minimal node size was {dispneia_best_step2$min_n} and depth tree was {dispneia_best_step2$tree_depth}.&quot;)</code></pre>
+<pre><code>## The best minimal node size was 5 and depth tree was 1.</code></pre>
+</div>
+<div id="step-3---number-for-the-reduction-in-the-loss-function-required-to-split-further-loss_reduction" class="section level3">
+<h3>Step 3 - Number for the reduction in the loss function required to split further (loss_reduction)</h3>
+</div>
+<div id="model-2" class="section level3">
+<h3>Model</h3>
+<pre class="r"><code># Modelo
+dispneia_xgb_model &lt;-
+  boost_tree(
+  min_n = 11,
+  mtry = 0.8,
+  trees = 25,
+  tree_depth = 1,
+  learn_rate = 0.31,
+  loss_reduction = tune(),
+  sample_size = 0.8
+) |&gt;
+  set_mode(&quot;classification&quot;) |&gt;
+  set_engine(&quot;xgboost&quot;, count = FALSE)</code></pre>
+</div>
+<div id="workflow-2" class="section level3">
+<h3>Workflow</h3>
+<pre class="r"><code># Workflow
+dispneia_xgb_wf &lt;- 
+  workflow() |&gt; 
+  add_model(dispneia_xgb_model) |&gt; 
+  add_recipe(dispneia_recipe)</code></pre>
+</div>
+<div id="tuning-2" class="section level3">
+<h3>Tuning</h3>
+<pre class="r"><code># Tune - min_n and tree_depth
+dispneia_grid_xgb &lt;-
+  expand.grid(
+    loss_reduction = seq(1, 4, 0.04)
+)
+
+dispneia_grid_xgb |&gt; 
+  DT::datatable()</code></pre>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-4" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-4">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76"],[1,1.04,1.08,1.12,1.16,1.2,1.24,1.28,1.32,1.36,1.4,1.44,1.48,1.52,1.56,1.6,1.64,1.68,1.72,1.76,1.8,1.84,1.88,1.92,1.96,2,2.04,2.08,2.12,2.16,2.2,2.24,2.28,2.32,2.36,2.4,2.44,2.48,2.52,2.56,2.6,2.64,2.68,2.72,2.76,2.8,2.84,2.88,2.92,2.96,3,3.04,3.08,3.12,3.16,3.2,3.24,3.28,3.32,3.36,3.4,3.44,3.48,3.52,3.56,3.6,3.64,3.68,3.72,3.76,3.8,3.84,3.88,3.92,3.96,4]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>loss_reduction<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":1},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>doParallel::registerDoParallel(4)
+
+dispneia_xgb_tune_grid &lt;-
+  tune_grid(
+  dispneia_xgb_wf,
+  resamples = dispneia_resamples,
+  grid = dispneia_grid_xgb,
+  metrics = metric_set(roc_auc, accuracy, sensitivity, specificity),
+  verbose = TRUE
+  )</code></pre>
+<pre class="r"><code>autoplot(dispneia_xgb_tune_grid) +
+  theme_bw() </code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-29-1.png" width="100%" /></p>
+<pre class="r"><code>collect_metrics(dispneia_xgb_tune_grid) |&gt; 
+  filter(.metric == &quot;roc_auc&quot;) |&gt; 
+  filter(mean == max(mean))</code></pre>
+<pre><code>## # A tibble: 1 × 7
+##   loss_reduction .metric .estimator  mean     n std_err .config              
+##            &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;                
+## 1           1.88 roc_auc binary     0.820     5  0.0195 Preprocessor1_Model23</code></pre>
+<pre class="r"><code>dispneia_xgb_tune_grid |&gt; 
+  select_best(metric = &quot;roc_auc&quot;)</code></pre>
+<pre><code>## # A tibble: 1 × 2
+##   loss_reduction .config              
+##            &lt;dbl&gt; &lt;chr&gt;                
+## 1           1.88 Preprocessor1_Model23</code></pre>
+<pre class="r"><code>show_best(dispneia_xgb_tune_grid, n = 6)</code></pre>
+<pre><code>## Warning: No value of `metric` was given; metric &#39;roc_auc&#39; will be used.</code></pre>
+<pre><code>## # A tibble: 6 × 7
+##   loss_reduction .metric .estimator  mean     n std_err .config              
+##            &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;                
+## 1           1.88 roc_auc binary     0.820     5  0.0195 Preprocessor1_Model23
+## 2           3.76 roc_auc binary     0.819     5  0.0168 Preprocessor1_Model70
+## 3           3.12 roc_auc binary     0.819     5  0.0207 Preprocessor1_Model54
+## 4           1.92 roc_auc binary     0.819     5  0.0206 Preprocessor1_Model24
+## 5           2.64 roc_auc binary     0.818     5  0.0205 Preprocessor1_Model42
+## 6           2    roc_auc binary     0.816     5  0.0205 Preprocessor1_Model26</code></pre>
+<pre class="r"><code>dispneia_best_step3 &lt;-
+  dispneia_xgb_tune_grid |&gt;
+  select_best(metric = &quot;roc_auc&quot;)
+
+# best hiperparameters
+glue::glue(&quot;The best loss_reduction was {dispneia_best_step3$loss_reduction}.&quot;)</code></pre>
+<pre><code>## The best loss_reduction was 1.88.</code></pre>
+</div>
+<div id="step-4---number-or-proportion-of-predictors-that-will-be-randomly-sampled-mtry-and-number-or-proportion-of-data-that-is-exposed-to-the-fitting-routine-sample_size" class="section level3">
+<h3>Step 4 - Number (or proportion) of predictors that will be randomly sampled (mtry) and number (or proportion) of data that is exposed to the fitting routine (sample_size)</h3>
+</div>
+<div id="model-3" class="section level3">
+<h3>Model</h3>
+<pre class="r"><code># Modelo
+dispneia_xgb_model &lt;-
+  boost_tree(
+  min_n = 11,
+  mtry = tune(),
+  trees = 25,
+  tree_depth = 1,
+  learn_rate = 0.31,
+  loss_reduction = 1.36,
+  sample_size = tune()
+) |&gt;
+  set_mode(&quot;classification&quot;) |&gt;
+  set_engine(&quot;xgboost&quot;, count = FALSE)</code></pre>
+</div>
+<div id="workflow-3" class="section level3">
+<h3>Workflow</h3>
+<pre class="r"><code># Workflow
+dispneia_xgb_wf &lt;- 
+  workflow() |&gt; 
+  add_model(dispneia_xgb_model) |&gt; 
+  add_recipe(dispneia_recipe)</code></pre>
+</div>
+<div id="tuning-3" class="section level3">
+<h3>Tuning</h3>
+<pre class="r"><code># Tune - min_n and tree_depth
+dispneia_grid_xgb &lt;-
+  expand.grid(
+    mtry = seq(0.2, 1.0, 0.2),
+    sample_size = seq(0.2, 1.0,by = 0.2)
+)
+
+dispneia_grid_xgb |&gt; 
+  DT::datatable()</code></pre>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-5" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-5">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25"],[0.2,0.4,0.6000000000000001,0.8,1,0.2,0.4,0.6000000000000001,0.8,1,0.2,0.4,0.6000000000000001,0.8,1,0.2,0.4,0.6000000000000001,0.8,1,0.2,0.4,0.6000000000000001,0.8,1],[0.2,0.2,0.2,0.2,0.2,0.4,0.4,0.4,0.4,0.4,0.6000000000000001,0.6000000000000001,0.6000000000000001,0.6000000000000001,0.6000000000000001,0.8,0.8,0.8,0.8,0.8,1,1,1,1,1]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>mtry<\/th>\n      <th>sample_size<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>doParallel::registerDoParallel(4)
+
+dispneia_xgb_tune_grid &lt;-
+  tune_grid(
+  dispneia_xgb_wf,
+  resamples = dispneia_resamples,
+  grid = dispneia_grid_xgb,
+  metrics = metric_set(roc_auc, accuracy, sensitivity, specificity),
+  verbose = TRUE
+  )</code></pre>
+<pre class="r"><code>autoplot(dispneia_xgb_tune_grid) +
+  theme_bw() +
+  theme(legend.position = &quot;top&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-34-1.png" width="100%" /></p>
+<pre class="r"><code>collect_metrics(dispneia_xgb_tune_grid) |&gt; 
+  filter(.metric == &quot;roc_auc&quot;) |&gt; 
+  filter(mean == max(mean))</code></pre>
+<pre><code>## # A tibble: 1 × 8
+##    mtry sample_size .metric .estimator  mean     n std_err .config              
+##   &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;                
+## 1   0.6           1 roc_auc binary     0.820     5  0.0217 Preprocessor1_Model23</code></pre>
+<pre class="r"><code>dispneia_xgb_tune_grid |&gt; 
+  select_best(metric = &quot;roc_auc&quot;)</code></pre>
+<pre><code>## # A tibble: 1 × 3
+##    mtry sample_size .config              
+##   &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;                
+## 1   0.6           1 Preprocessor1_Model23</code></pre>
+<pre class="r"><code>show_best(dispneia_xgb_tune_grid, n = 6)</code></pre>
+<pre><code>## Warning: No value of `metric` was given; metric &#39;roc_auc&#39; will be used.</code></pre>
+<pre><code>## # A tibble: 6 × 8
+##    mtry sample_size .metric .estimator  mean     n std_err .config              
+##   &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;                
+## 1   0.6         1   roc_auc binary     0.820     5  0.0217 Preprocessor1_Model23
+## 2   1           0.8 roc_auc binary     0.819     5  0.0197 Preprocessor1_Model20
+## 3   0.4         1   roc_auc binary     0.818     5  0.0218 Preprocessor1_Model22
+## 4   0.8         1   roc_auc binary     0.818     5  0.0215 Preprocessor1_Model24
+## 5   1           1   roc_auc binary     0.817     5  0.0225 Preprocessor1_Model25
+## 6   0.2         1   roc_auc binary     0.812     5  0.0227 Preprocessor1_Model21</code></pre>
+<pre class="r"><code>dispneia_best_step4 &lt;-
+  dispneia_xgb_tune_grid |&gt;
+  select_best(metric = &quot;roc_auc&quot;)
+
+# best hiperparameters
+glue::glue(&quot;The best number (or proportion) of predictors that will be randomly sampled (mtry) was {dispneia_best_step4$mtry} and the number (or proportion) of data that is exposed to the fitting routine (sample size) was {dispneia_best_step4$sample_size}.&quot;)</code></pre>
+<pre><code>## The best number (or proportion) of predictors that will be randomly sampled (mtry) was 0.6 and the number (or proportion) of data that is exposed to the fitting routine (sample size) was 1.</code></pre>
+</div>
+<div id="step-5---training-again-learing-rate-and-trees-with-lower-values" class="section level3">
+<h3>Step 5 - Training again learing rate and trees with lower values</h3>
+</div>
+<div id="model-4" class="section level3">
+<h3>Model</h3>
+<pre class="r"><code># Modelo
+dispneia_xgb_model &lt;-
+  boost_tree(
+  min_n = 11,
+  mtry = 0.8,
+  trees = tune(),
+  tree_depth = 1,
+  learn_rate = tune(),
+  loss_reduction = 1.36,
+  sample_size = 0.8
+) |&gt;
+  set_mode(&quot;classification&quot;) |&gt;
+  set_engine(&quot;xgboost&quot;, count = FALSE)</code></pre>
+</div>
+<div id="workflow-4" class="section level3">
+<h3>Workflow</h3>
+<pre class="r"><code># Workflow
+dispneia_xgb_wf &lt;- 
+  workflow() |&gt; 
+  add_model(dispneia_xgb_model) |&gt; 
+  add_recipe(dispneia_recipe)</code></pre>
+</div>
+<div id="tuning-4" class="section level3">
+<h3>Tuning</h3>
+<pre class="r"><code># Tune - min_n and tree_depth
+dispneia_grid_xgb &lt;-
+  expand.grid(
+    trees = seq(15, 700, 25),
+    learn_rate = seq(0.02, 0.1, 0.02)
+)
+
+dispneia_grid_xgb |&gt; 
+  DT::datatable()</code></pre>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-6" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-6">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76","77","78","79","80","81","82","83","84","85","86","87","88","89","90","91","92","93","94","95","96","97","98","99","100","101","102","103","104","105","106","107","108","109","110","111","112","113","114","115","116","117","118","119","120","121","122","123","124","125","126","127","128","129","130","131","132","133","134","135","136","137","138","139","140"],[15,40,65,90,115,140,165,190,215,240,265,290,315,340,365,390,415,440,465,490,515,540,565,590,615,640,665,690,15,40,65,90,115,140,165,190,215,240,265,290,315,340,365,390,415,440,465,490,515,540,565,590,615,640,665,690,15,40,65,90,115,140,165,190,215,240,265,290,315,340,365,390,415,440,465,490,515,540,565,590,615,640,665,690,15,40,65,90,115,140,165,190,215,240,265,290,315,340,365,390,415,440,465,490,515,540,565,590,615,640,665,690,15,40,65,90,115,140,165,190,215,240,265,290,315,340,365,390,415,440,465,490,515,540,565,590,615,640,665,690],[0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.04,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.08,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>trees<\/th>\n      <th>learn_rate<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>doParallel::registerDoParallel(4)
+
+dispneia_xgb_tune_grid &lt;-
+  tune_grid(
+  dispneia_xgb_wf,
+  resamples = dispneia_resamples,
+  grid = dispneia_grid_xgb,
+  metrics = metric_set(roc_auc, accuracy, sensitivity, specificity),
+  verbose = TRUE
+  )</code></pre>
+<pre class="r"><code>autoplot(dispneia_xgb_tune_grid) +
+  theme_bw() +
+  theme(legend.position = &quot;top&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-39-1.png" width="100%" /></p>
+<pre class="r"><code>collect_metrics(dispneia_xgb_tune_grid) |&gt; 
+  filter(.metric == &quot;roc_auc&quot;) |&gt; 
+  filter(mean == max(mean))</code></pre>
+<pre><code>## # A tibble: 1 × 8
+##   trees learn_rate .metric .estimator  mean     n std_err .config               
+##   &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;                 
+## 1   190        0.1 roc_auc binary     0.820     5  0.0169 Preprocessor1_Model120</code></pre>
+<pre class="r"><code>dispneia_xgb_tune_grid |&gt; 
+  select_best(metric = &quot;roc_auc&quot;)</code></pre>
+<pre><code>## # A tibble: 1 × 3
+##   trees learn_rate .config               
+##   &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;                 
+## 1   190        0.1 Preprocessor1_Model120</code></pre>
+<pre class="r"><code>show_best(dispneia_xgb_tune_grid, n = 6)</code></pre>
+<pre><code>## Warning: No value of `metric` was given; metric &#39;roc_auc&#39; will be used.</code></pre>
+<pre><code>## # A tibble: 6 × 8
+##   trees learn_rate .metric .estimator  mean     n std_err .config               
+##   &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;                 
+## 1   190       0.1  roc_auc binary     0.820     5  0.0169 Preprocessor1_Model120
+## 2   165       0.1  roc_auc binary     0.819     5  0.0175 Preprocessor1_Model119
+## 3   290       0.04 roc_auc binary     0.819     5  0.0195 Preprocessor1_Model040
+## 4   265       0.06 roc_auc binary     0.819     5  0.0191 Preprocessor1_Model067
+## 5   315       0.04 roc_auc binary     0.819     5  0.0196 Preprocessor1_Model041
+## 6   290       0.06 roc_auc binary     0.819     5  0.0187 Preprocessor1_Model068</code></pre>
+<pre class="r"><code>dispneia_best_step5 &lt;-
+  dispneia_xgb_tune_grid |&gt;
+  select_best(metric = &quot;roc_auc&quot;)
+
+# best hiperparameters
+glue::glue(&quot;Following tunning again, the best number of trees was {dispneia_best_step5$trees} and learn_rate was {dispneia_best_step5$learn_rate}.&quot;)</code></pre>
+<pre><code>## Following tunning again, the best number of trees was 190 and learn_rate was 0.1.</code></pre>
+</div>
+<div id="final-model-performance" class="section level3">
+<h3>Final model performance</h3>
+</div>
+<div id="model-5" class="section level3">
+<h3>Model</h3>
+<pre class="r"><code># Model
+dispneia_xgb_final_model &lt;-
+  boost_tree(
+  min_n = 11,
+  mtry = 0.8,
+  trees = 565,
+  tree_depth = 1,
+  learn_rate = 0.02,
+  loss_reduction = 1.36,
+  sample_size = 0.8
+) |&gt;
+  set_mode(&quot;classification&quot;) |&gt;
+  set_engine(&quot;xgboost&quot;, count = FALSE)</code></pre>
+</div>
+<div id="workflow-5" class="section level3">
+<h3>Workflow</h3>
+<pre class="r"><code># Workflow
+dispneia_xgb_final_wf &lt;- 
+  workflow() |&gt; 
+  add_model(dispneia_xgb_final_model) |&gt; 
+  add_recipe(dispneia_recipe)</code></pre>
+</div>
+<div id="tuning-5" class="section level3">
+<h3>Tuning</h3>
+<pre class="r"><code># Tune - min_n and tree_depth
+dispneia_best_params_xgb &lt;-
+  expand.grid(
+    min_n = 11,
+    mtry = 0.8,
+    trees = 565,
+    tree_depth = 1,
+    learn_rate = 0.02,
+    loss_reduction = 1.36,
+    sample_size = 0.8
+)
+
+dispneia_best_params_xgb |&gt; 
+  DT::datatable()</code></pre>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-7" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-7">{"x":{"filter":"none","vertical":false,"data":[["1"],[11],[0.8],[565],[1],[0.02],[1.36],[0.8]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>min_n<\/th>\n      <th>mtry<\/th>\n      <th>trees<\/th>\n      <th>tree_depth<\/th>\n      <th>learn_rate<\/th>\n      <th>loss_reduction<\/th>\n      <th>sample_size<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5,6,7]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code># Desempenho do modelo finaL ----------------------------------------------
+dispneia_xgb_final_wf &lt;- 
+  dispneia_xgb_final_wf |&gt;
+  finalize_workflow(dispneia_best_params_xgb)
+
+dispneia_xgb_last_fit &lt;-
+  last_fit(dispneia_xgb_final_wf, dispneia_initial_split)
+
+collect_predictions(dispneia_xgb_last_fit) |&gt; 
+  mutate(modelo = &quot;XGBoost&quot;) |&gt; 
+  group_by(modelo) |&gt; 
+  roc_curve(dispneia, .pred_No) |&gt; 
+  autoplot() +
+  theme_bw() +
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-43-1.png" width="672" /></p>
+<pre class="r"><code>dispneia_xgb_last_fit_model &lt;- dispneia_xgb_last_fit$.workflow[[1]]$fit$fit
+
+dispneia_xgb_vip &lt;- 
+  extract_fit_engine(dispneia_xgb_last_fit)
+
+vip::vip(dispneia_xgb_vip)+
+  theme_bw()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-44-1.png" width="672" /></p>
+</div>
+</div>
+</div>
+<div id="conclusions" class="section level1">
+<h1>Conclusions</h1>
+<p>xxxxxxxxxxx</p>
 </div>

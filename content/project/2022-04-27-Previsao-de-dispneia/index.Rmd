@@ -6,7 +6,7 @@ categories:
 - package
 date: "2024-01-06"
 draft: false
-excerpt: This project aims to model machine learning algoritms to predict dyspnea in COVID-19 survivors 6-9 months after hospital discharge. 
+excerpt: This project used XGboost to predict dyspnea in COVID-19 survivors 6-9 months after hospital discharge. 
   websites.
 featured: true
 layout: single-sidebar
@@ -15,6 +15,8 @@ tags:
 - hugo-site
 title: Using XGboost to Predict Dyspnea in COVID-19 Survivors
 ---
+# Introduction
+xxxxxxxxxxx
 
 ## Packages
 ```{r message=FALSE, warning=FALSE}
@@ -199,3 +201,456 @@ dispneia_resamples$splits
 ```
 
 ## Modeling
+## XGBoost
+### Step 1 - Number of trees (trees) and learn rate (learn_rate)
+### Model
+```{r}
+# Modelo
+dispneia_xgb_model <-
+  boost_tree(
+  min_n = 15,
+  mtry = 0.8,
+  trees = tune(),
+  tree_depth = 5,
+  learn_rate = tune(),
+  loss_reduction = 0,
+  sample_size = 0.8
+) |>
+  set_mode("classification") |>
+  set_engine("xgboost", count = FALSE)
+```
+
+### Workflow
+```{r}
+# Workflow
+dispneia_xgb_wf <- 
+  workflow() |> 
+  add_model(dispneia_xgb_model) |> 
+  add_recipe(dispneia_recipe)
+
+```
+
+### Tuning
+```{r}
+# Tune
+dispneia_grid_xgb <-
+  expand.grid(
+    trees = seq(25, 800, 25),
+    learn_rate = seq(0.01, 0.4,0.1)
+)
+
+dispneia_grid_xgb |> 
+  DT::datatable()
+```
+
+```{r warning=FALSE}
+doParallel::registerDoParallel(4)
+
+dispneia_xgb_tune_grid <-
+  tune_grid(
+  dispneia_xgb_wf,
+  resamples = dispneia_resamples,
+  grid = dispneia_grid_xgb,
+  metrics = metric_set(roc_auc, accuracy, sensitivity, specificity),
+  verbose = TRUE
+  )
+```
+
+```{r, out.width="100%"}
+autoplot(dispneia_xgb_tune_grid) +
+  theme_bw() +
+  theme(legend.position = "top")
+
+collect_metrics(dispneia_xgb_tune_grid) |> 
+  filter(.metric == "roc_auc") |> 
+  filter(mean == max(mean))
+
+dispneia_xgb_tune_grid |> 
+  select_best(metric = "roc_auc")
+
+show_best(dispneia_xgb_tune_grid, n = 6)
+
+dispneia_best_step1 <-
+  dispneia_xgb_tune_grid |>
+  select_best(metric = "roc_auc")
+
+# best hiperparameters
+glue::glue("The best number of trees was {dispneia_best_step1$trees} and learn_rate was {dispneia_best_step1$learn_rate}.")
+```
+
+### Step 2 -  Minimal node size (min_n) and depth tree (tree_depth)
+### Model
+```{r}
+# Modelo
+dispneia_xgb_model <-
+  boost_tree(
+  min_n = tune(),
+  mtry = 0.8,
+  trees = 25,
+  tree_depth = tune(),
+  learn_rate = 0.31,
+  loss_reduction = 0,
+  sample_size = 0.8
+) |>
+  set_mode("classification") |>
+  set_engine("xgboost", count = FALSE)
+```
+
+### Workflow
+```{r}
+# Workflow
+dispneia_xgb_wf <- 
+  workflow() |> 
+  add_model(dispneia_xgb_model) |> 
+  add_recipe(dispneia_recipe)
+
+```
+
+### Tuning
+```{r}
+# Tune - min_n and tree_depth
+dispneia_grid_xgb <-
+  expand.grid(
+    min_n = seq(1,16,2),
+    tree_depth = seq(1,17,4)
+)
+
+dispneia_grid_xgb |> 
+  DT::datatable()
+```
+```{r warning=FALSE}
+doParallel::registerDoParallel(4)
+
+dispneia_xgb_tune_grid <-
+  tune_grid(
+  dispneia_xgb_wf,
+  resamples = dispneia_resamples,
+  grid = dispneia_grid_xgb,
+  metrics = metric_set(roc_auc, accuracy, sensitivity, specificity),
+  verbose = TRUE
+  )
+```
+
+```{r, out.width="100%"}
+autoplot(dispneia_xgb_tune_grid) +
+  theme_bw() +
+  theme(legend.position = "top")
+
+collect_metrics(dispneia_xgb_tune_grid) |> 
+  filter(.metric == "roc_auc") |> 
+  filter(mean == max(mean))
+
+dispneia_xgb_tune_grid |> 
+  select_best(metric = "roc_auc")
+
+
+show_best(dispneia_xgb_tune_grid, n = 6)
+
+dispneia_best_step2 <-
+  dispneia_xgb_tune_grid |>
+  select_best(metric = "roc_auc")
+
+# best hiperparameters
+glue::glue("The best minimal node size was {dispneia_best_step2$min_n} and depth tree was {dispneia_best_step2$tree_depth}.")
+```
+### Step 3 -  Number for the reduction in the loss function required to split further (loss_reduction)
+### Model
+```{r}
+# Modelo
+dispneia_xgb_model <-
+  boost_tree(
+  min_n = 11,
+  mtry = 0.8,
+  trees = 25,
+  tree_depth = 1,
+  learn_rate = 0.31,
+  loss_reduction = tune(),
+  sample_size = 0.8
+) |>
+  set_mode("classification") |>
+  set_engine("xgboost", count = FALSE)
+```
+
+### Workflow
+```{r}
+# Workflow
+dispneia_xgb_wf <- 
+  workflow() |> 
+  add_model(dispneia_xgb_model) |> 
+  add_recipe(dispneia_recipe)
+
+```
+
+### Tuning
+```{r}
+# Tune - min_n and tree_depth
+dispneia_grid_xgb <-
+  expand.grid(
+    loss_reduction = seq(1, 4, 0.04)
+)
+
+dispneia_grid_xgb |> 
+  DT::datatable()
+```
+```{r warning=FALSE}
+doParallel::registerDoParallel(4)
+
+dispneia_xgb_tune_grid <-
+  tune_grid(
+  dispneia_xgb_wf,
+  resamples = dispneia_resamples,
+  grid = dispneia_grid_xgb,
+  metrics = metric_set(roc_auc, accuracy, sensitivity, specificity),
+  verbose = TRUE
+  )
+```
+
+```{r, out.width="100%"}
+autoplot(dispneia_xgb_tune_grid) +
+  theme_bw() 
+
+collect_metrics(dispneia_xgb_tune_grid) |> 
+  filter(.metric == "roc_auc") |> 
+  filter(mean == max(mean))
+
+dispneia_xgb_tune_grid |> 
+  select_best(metric = "roc_auc")
+
+
+show_best(dispneia_xgb_tune_grid, n = 6)
+
+dispneia_best_step3 <-
+  dispneia_xgb_tune_grid |>
+  select_best(metric = "roc_auc")
+
+# best hiperparameters
+glue::glue("The best loss_reduction was {dispneia_best_step3$loss_reduction}.")
+```
+
+### Step 4 -  Number (or proportion) of predictors that will be randomly sampled (mtry) and number (or proportion) of data that is exposed to the fitting routine (sample_size)
+### Model
+```{r}
+# Modelo
+dispneia_xgb_model <-
+  boost_tree(
+  min_n = 11,
+  mtry = tune(),
+  trees = 25,
+  tree_depth = 1,
+  learn_rate = 0.31,
+  loss_reduction = 1.36,
+  sample_size = tune()
+) |>
+  set_mode("classification") |>
+  set_engine("xgboost", count = FALSE)
+```
+
+### Workflow
+```{r}
+# Workflow
+dispneia_xgb_wf <- 
+  workflow() |> 
+  add_model(dispneia_xgb_model) |> 
+  add_recipe(dispneia_recipe)
+
+```
+
+### Tuning
+```{r}
+# Tune - min_n and tree_depth
+dispneia_grid_xgb <-
+  expand.grid(
+    mtry = seq(0.2, 1.0, 0.2),
+    sample_size = seq(0.2, 1.0,by = 0.2)
+)
+
+dispneia_grid_xgb |> 
+  DT::datatable()
+```
+
+```{r warning=FALSE}
+doParallel::registerDoParallel(4)
+
+dispneia_xgb_tune_grid <-
+  tune_grid(
+  dispneia_xgb_wf,
+  resamples = dispneia_resamples,
+  grid = dispneia_grid_xgb,
+  metrics = metric_set(roc_auc, accuracy, sensitivity, specificity),
+  verbose = TRUE
+  )
+```
+
+```{r, out.width="100%"}
+autoplot(dispneia_xgb_tune_grid) +
+  theme_bw() +
+  theme(legend.position = "top")
+
+collect_metrics(dispneia_xgb_tune_grid) |> 
+  filter(.metric == "roc_auc") |> 
+  filter(mean == max(mean))
+
+dispneia_xgb_tune_grid |> 
+  select_best(metric = "roc_auc")
+
+show_best(dispneia_xgb_tune_grid, n = 6)
+
+dispneia_best_step4 <-
+  dispneia_xgb_tune_grid |>
+  select_best(metric = "roc_auc")
+
+# best hiperparameters
+glue::glue("The best number (or proportion) of predictors that will be randomly sampled (mtry) was {dispneia_best_step4$mtry} and the number (or proportion) of data that is exposed to the fitting routine (sample size) was {dispneia_best_step4$sample_size}.")
+```
+
+### Step 5 -  Training again learing rate and trees with lower values
+### Model
+```{r}
+# Modelo
+dispneia_xgb_model <-
+  boost_tree(
+  min_n = 11,
+  mtry = 0.8,
+  trees = tune(),
+  tree_depth = 1,
+  learn_rate = tune(),
+  loss_reduction = 1.36,
+  sample_size = 0.8
+) |>
+  set_mode("classification") |>
+  set_engine("xgboost", count = FALSE)
+```
+
+### Workflow
+```{r}
+# Workflow
+dispneia_xgb_wf <- 
+  workflow() |> 
+  add_model(dispneia_xgb_model) |> 
+  add_recipe(dispneia_recipe)
+```
+
+### Tuning
+```{r}
+# Tune - min_n and tree_depth
+dispneia_grid_xgb <-
+  expand.grid(
+    trees = seq(15, 700, 25),
+    learn_rate = seq(0.02, 0.1, 0.02)
+)
+
+dispneia_grid_xgb |> 
+  DT::datatable()
+```
+
+```{r warning=FALSE}
+doParallel::registerDoParallel(4)
+
+dispneia_xgb_tune_grid <-
+  tune_grid(
+  dispneia_xgb_wf,
+  resamples = dispneia_resamples,
+  grid = dispneia_grid_xgb,
+  metrics = metric_set(roc_auc, accuracy, sensitivity, specificity),
+  verbose = TRUE
+  )
+```
+
+```{r, out.width="100%"}
+autoplot(dispneia_xgb_tune_grid) +
+  theme_bw() +
+  theme(legend.position = "top")
+
+collect_metrics(dispneia_xgb_tune_grid) |> 
+  filter(.metric == "roc_auc") |> 
+  filter(mean == max(mean))
+
+dispneia_xgb_tune_grid |> 
+  select_best(metric = "roc_auc")
+
+show_best(dispneia_xgb_tune_grid, n = 6)
+
+dispneia_best_step5 <-
+  dispneia_xgb_tune_grid |>
+  select_best(metric = "roc_auc")
+
+# best hiperparameters
+glue::glue("Following tunning again, the best number of trees was {dispneia_best_step5$trees} and learn_rate was {dispneia_best_step5$learn_rate}.")
+```
+
+### Final model performance
+### Model
+```{r}
+# Model
+dispneia_xgb_final_model <-
+  boost_tree(
+  min_n = 11,
+  mtry = 0.8,
+  trees = 565,
+  tree_depth = 1,
+  learn_rate = 0.02,
+  loss_reduction = 1.36,
+  sample_size = 0.8
+) |>
+  set_mode("classification") |>
+  set_engine("xgboost", count = FALSE)
+```
+
+### Workflow
+```{r}
+# Workflow
+dispneia_xgb_final_wf <- 
+  workflow() |> 
+  add_model(dispneia_xgb_final_model) |> 
+  add_recipe(dispneia_recipe)
+```
+
+### Tuning
+```{r}
+# Tune - min_n and tree_depth
+dispneia_best_params_xgb <-
+  expand.grid(
+    min_n = 11,
+    mtry = 0.8,
+    trees = 565,
+    tree_depth = 1,
+    learn_rate = 0.02,
+    loss_reduction = 1.36,
+    sample_size = 0.8
+)
+
+dispneia_best_params_xgb |> 
+  DT::datatable()
+```
+
+```{r warning=FALSE}
+# Desempenho do modelo finaL ----------------------------------------------
+dispneia_xgb_final_wf <- 
+  dispneia_xgb_final_wf |>
+  finalize_workflow(dispneia_best_params_xgb)
+
+dispneia_xgb_last_fit <-
+  last_fit(dispneia_xgb_final_wf, dispneia_initial_split)
+
+collect_predictions(dispneia_xgb_last_fit) |> 
+  mutate(modelo = "XGBoost") |> 
+  group_by(modelo) |> 
+  roc_curve(dispneia, .pred_No) |> 
+  autoplot() +
+  theme_bw() +
+  theme(legend.position = "none")
+```
+
+```{r}
+dispneia_xgb_last_fit_model <- dispneia_xgb_last_fit$.workflow[[1]]$fit$fit
+
+dispneia_xgb_vip <- 
+  extract_fit_engine(dispneia_xgb_last_fit)
+
+vip::vip(dispneia_xgb_vip)+
+  theme_bw()
+
+```
+
+# Conclusions
+xxxxxxxxxxx
