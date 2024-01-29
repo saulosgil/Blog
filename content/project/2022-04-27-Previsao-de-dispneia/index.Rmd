@@ -16,7 +16,13 @@ tags:
 title: Using XGboost to Predict Dyspnea in COVID-19 Survivors
 ---
 # Introduction
-xxxxxxxxxxx
+Dispnea is a medical term that refers to the sensation of shortness of breath or difficulty breathing 1. It is a common symptom of heart and lung diseases, such as asthma, pneumonia, and chronic obstructive pulmonary disease (COPD).
+
+In the context of COVID-19, dyspnea is one of the most common symptoms experienced by infected individuals, but it remains even after acute COVID-19 is solved. According to a study published in BMC Pulmonary Medicine, 45% of COVID-19 pneumonia survivors admitted to the hospital experience dyspnea even after 1 year from hospital discharge. In this sense, identifying patients at risk of presenting dyspnea is crucial for early management.
+
+XGBoost (eXtreme Gradient Boosting) is a very popular ML algorithm. Its popularity is due to the fact that has recently been dominating applied machine learning and Kaggle competitions for structured or tabular data. Therefore, the implementation of ML algorithm XGBoost in clinical setting may be useful for predicting COVID-19 survivors at the risk of dyspnea following discharge.
+
+Herein, we utilized the XGBoost to predict dyspnea in COVID-19 survivors 6-9 months after hospital discharge 
 
 ## Packages
 ```{r message=FALSE, warning=FALSE}
@@ -30,12 +36,16 @@ library(doParallel)
 ```
 
 ## Reading dataset
+The dataset consist in a real dataset collected in the largest tertiary hospital of Latin America (Clinical Hospital, School of Medicine of the University of Sao Paulo). 
+
 ```{r}
 # Lendo a base
 dispneia <- read.csv2('df_ajustada.csv')
 ```
 
 ## Spliting dataset - Train/Test
+Since our dataset is size-limited, I opted to separate 80% of the sample size for training.
+
 ```{r}
 set.seed(32)
 
@@ -172,6 +182,15 @@ contagens |>
 
 ## Preprocessing and Feature Engineering Steps using Recipes package
 # Recipe
+
+For numeric features, the values were normalized, multicollineariry higher than 0.8 were removed and missing values were imputed with median.
+
+For nominal features, missing values were imputed with more frequent value, and all features were transformed in a dummy feature.
+
+Features containing only zero were removed.
+
+The processed dataset can be seen below.
+
 ```{r}
 dispneia_recipe <-
   recipe(formula = dispneia ~ ., dispneia_train) |>
@@ -181,7 +200,6 @@ dispneia_recipe <-
   step_impute_mode(all_nominal_predictors()) |> # Processing missing categorical data - imputing more frequent class
   step_zv(all_predictors()) |>  # removing variables that contain only zero (zero variance filter)
   step_dummy(all_nominal_predictors()) # dummy - nominal predictors
-
 
 # Checking the result of the recipe (and whether the steps worked!)
 dispneia_recipe |> 
@@ -195,13 +213,26 @@ dispneia_recipe |>
 dispneia_resamples <- 
   vfold_cv(dispneia_train,
            v = 5, 
-           strata = dispneia) # 3 folds due to limited dataset
+           strata = dispneia) # 5 folds
 
 dispneia_resamples$splits
 ```
 
 ## Modeling
 ## XGBoost
+The hyperameters tuned were:
+
+ - boost_tree;
+ - min_n: An integer for the minimum number of data points in a node that is required for the node to be split further;
+ - mtry: A number for the number (or proportion) of predictors that will be randomly sampled at each split when creating the tree models (specific engines only);
+ - trees: An integer for the number of trees contained in the ensemble;
+ - tree_depth: An integer for the maximum depth of the tree (i.e. number of splits) (specific engines only);
+ - learn_rate: A number for the rate at which the boosting algorithm adapts from iteration-to-iteration (specific engines only). This is sometimes referred to as the shrinkage parameter;
+ - loss_reduction: A number for the reduction in the loss function required to split further (specific engines only);
+ - sample_size: A number for the number (or proportion) of data that is exposed to the fitting routine. For xgboost, the sampling is done at each iteration while C5.0 samples once during training.
+
+The tuning process were done in 5 steps.
+
 ### Step 1 - Number of trees (trees) and learn rate (learn_rate)
 ### Model
 ```{r}
@@ -256,7 +287,7 @@ dispneia_xgb_tune_grid <-
   )
 ```
 
-```{r, out.width="100%"}
+```{r warning=FALSE, out.width="100%"}
 autoplot(dispneia_xgb_tune_grid) +
   theme_bw() +
   theme(legend.position = "top")
@@ -273,7 +304,9 @@ show_best(dispneia_xgb_tune_grid, n = 6)
 dispneia_best_step1 <-
   dispneia_xgb_tune_grid |>
   select_best(metric = "roc_auc")
+```
 
+```{r}
 # best hiperparameters
 glue::glue("The best number of trees was {dispneia_best_step1$trees} and learn_rate was {dispneia_best_step1$learn_rate}.")
 ```
@@ -331,7 +364,7 @@ dispneia_xgb_tune_grid <-
   )
 ```
 
-```{r, out.width="100%"}
+```{r warning=FALSE, out.width="100%"}
 autoplot(dispneia_xgb_tune_grid) +
   theme_bw() +
   theme(legend.position = "top")
@@ -349,7 +382,9 @@ show_best(dispneia_xgb_tune_grid, n = 6)
 dispneia_best_step2 <-
   dispneia_xgb_tune_grid |>
   select_best(metric = "roc_auc")
+```
 
+```{r warning=FALSE, out.width="100%"}
 # best hiperparameters
 glue::glue("The best minimal node size was {dispneia_best_step2$min_n} and depth tree was {dispneia_best_step2$tree_depth}.")
 ```
@@ -422,7 +457,9 @@ show_best(dispneia_xgb_tune_grid, n = 6)
 dispneia_best_step3 <-
   dispneia_xgb_tune_grid |>
   select_best(metric = "roc_auc")
+```
 
+```{r warning=FALSE, out.width="100%"}
 # best hiperparameters
 glue::glue("The best loss_reduction was {dispneia_best_step3$loss_reduction}.")
 ```
@@ -498,7 +535,9 @@ show_best(dispneia_xgb_tune_grid, n = 6)
 dispneia_best_step4 <-
   dispneia_xgb_tune_grid |>
   select_best(metric = "roc_auc")
+```
 
+```{r, out.width="100%"}
 # best hiperparameters
 glue::glue("The best number (or proportion) of predictors that will be randomly sampled (mtry) was {dispneia_best_step4$mtry} and the number (or proportion) of data that is exposed to the fitting routine (sample size) was {dispneia_best_step4$sample_size}.")
 ```
@@ -573,7 +612,9 @@ show_best(dispneia_xgb_tune_grid, n = 6)
 dispneia_best_step5 <-
   dispneia_xgb_tune_grid |>
   select_best(metric = "roc_auc")
+```
 
+```{r}
 # best hiperparameters
 glue::glue("Following tunning again, the best number of trees was {dispneia_best_step5$trees} and learn_rate was {dispneia_best_step5$learn_rate}.")
 ```
@@ -639,7 +680,15 @@ collect_predictions(dispneia_xgb_last_fit) |>
   autoplot() +
   theme_bw() +
   theme(legend.position = "none")
+
 ```
+
+```{r warning=FALSE}
+# best hiperparameters
+best_roc <- show_best(dispneia_xgb_last_fit)
+glue::glue("The best ROC was {round(best_roc$mean,2)}!")
+```
+
 
 ```{r}
 dispneia_xgb_last_fit_model <- dispneia_xgb_last_fit$.workflow[[1]]$fit$fit
@@ -653,4 +702,16 @@ vip::vip(dispneia_xgb_vip)+
 ```
 
 # Conclusions
-xxxxxxxxxxx
+Finally, XGBoost was effective to predict dyspnea in COVID-19 survivors 6-9 months after hospital discharge. Thus, XGBoost implementation in a clinical setting might aid health professionals in the early management of COVID-19 survivors at risk of future dyspnea.
+
+It is noteworthy  that the analyses performed herein are not intended to be used in practice. However, these analysis reinforce the utilization of ML algorithm in the health care.
+
+Hope you enjoyed it!`r emojifont::emoji("stuck_out_tongue_winking_eye")`!
+
+![](https://us.123rf.com/450wm/alesika/alesika2008/alesika200800157/153702004-see-you-soon-inscription-handwritten-lettering-illustration-black-vector-text-in-speech-bubble-simpl.jpg?ver=6)
+
+
+# References
+[Srazzo et al., Long-term dyspnea, regional ventilation distribution and peripheral lung function in COVID-19 survivors: a 1 year follow-up study](https://bmcpulmmed.biomedcentral.com/articles/10.1186/s12890-022-02214-5)
+
+[An Introduction to Statistical Learning: with Applications in R](https://www.statlearning.com/)
