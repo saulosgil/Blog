@@ -16,7 +16,7 @@ tags:
 title: Using XGboost to Predict Dyspnea in COVID-19 Survivors
 ---
 # Introduction
-Dispnea is a medical term that refers to the sensation of shortness of breath or difficulty breathing 1. It is a common symptom of heart and lung diseases, such as asthma, pneumonia, and chronic obstructive pulmonary disease (COPD).
+Dyspnea is a medical term that refers to the sensation of shortness of breath or difficulty breathing. It is a common symptom of heart and lung diseases, such as asthma, pneumonia, and chronic obstructive pulmonary disease (COPD).
 
 In the context of COVID-19, dyspnea is one of the most common symptoms experienced by infected individuals, but it remains even after acute COVID-19 is solved. According to a study published in BMC Pulmonary Medicine, 45% of COVID-19 pneumonia survivors admitted to the hospital experience dyspnea even after 1 year from hospital discharge. In this sense, identifying patients at risk of presenting dyspnea is crucial for early management.
 
