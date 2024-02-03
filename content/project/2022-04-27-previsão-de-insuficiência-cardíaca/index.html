@@ -4,17 +4,764 @@ categories:
 - Theme Features
 - R
 - package
-date: "2022-04-27"
+date: "2024-02-03"
 draft: false
-excerpt: Using database available at Kaggle, this project aims to model machine learning algoritms to predict heart failure
-  websites.
+excerpt: Using database available at Kaggle, this project used Random Forest to predict heart failure.
 featured: true
 layout: single-sidebar
 subtitle: "In progress"
 tags:
 - hugo-site
-title: Machine learning for Predicting Heart Failure.
+title: Using Random Forest to Predict Heart Failure.
 ---
 
+<script src="{{< blogdown/postref >}}index_files/htmlwidgets/htmlwidgets.js"></script>
+<link href="{{< blogdown/postref >}}index_files/datatables-css/datatables-crosstalk.css" rel="stylesheet" />
+<script src="{{< blogdown/postref >}}index_files/datatables-binding/datatables.js"></script>
+<script src="{{< blogdown/postref >}}index_files/jquery/jquery-3.6.0.min.js"></script>
+<link href="{{< blogdown/postref >}}index_files/dt-core/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="{{< blogdown/postref >}}index_files/dt-core/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="{{< blogdown/postref >}}index_files/dt-core/js/jquery.dataTables.min.js"></script>
+<link href="{{< blogdown/postref >}}index_files/crosstalk/css/crosstalk.min.css" rel="stylesheet" />
+<script src="{{< blogdown/postref >}}index_files/crosstalk/js/crosstalk.min.js"></script>
 
 
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>xxxxxxxx</p>
+<div id="packages" class="section level2">
+<h2>Packages</h2>
+<pre class="r"><code># Pacotes
+library(tidyverse)
+library(tidymodels)
+library(GGally)
+library(DataExplorer)
+library(doParallel)</code></pre>
+</div>
+<div id="reading-dataset" class="section level2">
+<h2>Reading dataset</h2>
+<p>The dataset consist in a real dataset collected in the largest tertiary hospital of Latin America (Clinical Hospital, School of Medicine of the University of Sao Paulo).</p>
+<pre class="r"><code># Lendo a base
+df &lt;- read.csv(&#39;heart.csv&#39;) |&gt; 
+  janitor::clean_names() |&gt; #lowercase columns
+  mutate(
+    heart_disease = as.factor(heart_disease)
+  )</code></pre>
+</div>
+<div id="pre-processing" class="section level2">
+<h2>Pre-processing</h2>
+<p>xxxxxxx</p>
+<div id="looking-the-outcome-heart-disease" class="section level3">
+<h3>Looking the outcome (heart disease)</h3>
+<pre class="r"><code>df |&gt;
+  ggplot(mapping = aes(x = heart_disease, fill = sex)) +
+  geom_bar()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code>df |&gt; 
+  count(heart_disease)</code></pre>
+<pre><code>##   heart_disease   n
+## 1             0 410
+## 2             1 508</code></pre>
+<p>The number of classes of the outcome is balanced!</p>
+</div>
+<div id="data-engineering" class="section level3">
+<h3>Data engineering</h3>
+<pre class="r"><code>df_adjust &lt;- 
+  df |&gt;
+  mutate(
+    # sex for dummies
+    sex = case_when(sex == &quot;M&quot; ~ &quot;0&quot;,
+                    sex == &quot;F&quot; ~ &quot;1&quot;),
+    # creating dummies for chest_pain_type
+    chest_pain_type_ATA = case_when(chest_pain_type == &quot;ATA&quot; ~ 1,
+                                    chest_pain_type != &quot;ATA&quot; ~ 0),
+    chest_pain_type_NAP = case_when(chest_pain_type == &quot;NAP&quot; ~ 1,
+                                    chest_pain_type != &quot;NAP&quot; ~ 0),
+    chest_pain_type_ASY = case_when(chest_pain_type == &quot;ASY&quot; ~ 1,
+                                    chest_pain_type != &quot;ASY&quot; ~ 0),
+    chest_pain_type_TA = case_when(chest_pain_type == &quot;TA&quot; ~ 1,
+                                    chest_pain_type != &quot;TA&quot; ~ 0),
+    # creating dummies for resting_ecg
+    resting_ecg_normal = case_when(resting_ecg == &quot;Normal&quot; ~ 1,
+                                   resting_ecg != &quot;Normal&quot; ~ 0),
+    resting_ecg_st = case_when(resting_ecg == &quot;ST&quot; ~ 1,
+                               resting_ecg != &quot;ST&quot; ~ 0),
+    resting_ecg_lvh = case_when(resting_ecg == &quot;LVH&quot; ~ 1,
+                                 resting_ecg != &quot;LVH&quot; ~ 0),
+    # creating dummies for exercise_angina
+    exercise_angina = case_when(exercise_angina == &quot;Y&quot; ~ 1,
+                                exercise_angina == &quot;N&quot; ~ 0),
+    # creating dummies for st_slope
+    st_slope_up = case_when(st_slope == &quot;Up&quot; ~ 1,
+                            st_slope != &quot;Up&quot; ~ 0),
+    st_slope_flat = case_when(st_slope == &quot;Flat&quot; ~ 1,
+                            st_slope != &quot;Flat&quot; ~ 0),
+    st_slope_down = case_when(st_slope == &quot;Down&quot; ~ 1,
+                            st_slope != &quot;Down&quot; ~ 0)
+    ) |&gt;
+  # selecting features
+  select(age,
+         sex,
+         resting_bp,
+         cholesterol,
+         fasting_bs,
+         max_hr,
+         oldpeak,
+         chest_pain_type_ATA,
+         chest_pain_type_NAP,
+         chest_pain_type_ASY,
+         chest_pain_type_TA,
+         resting_ecg_normal,
+         resting_ecg_st,
+         resting_ecg_lvh,
+         exercise_angina,
+         st_slope_up,
+         st_slope_flat,
+         st_slope_down,
+         heart_disease
+         ) |&gt;
+  #adjusting type of data
+  mutate(sex = as.character(sex),
+         fasting_bs = as.character(fasting_bs),
+         chest_pain_type_ATA = as.character(chest_pain_type_ATA),
+         chest_pain_type_NAP = as.character(chest_pain_type_NAP),
+         chest_pain_type_ASY = as.character(chest_pain_type_ASY),
+         chest_pain_type_TA = as.character(chest_pain_type_TA),
+         resting_ecg_normal = as.character(resting_ecg_normal),
+         resting_ecg_st = as.character(resting_ecg_st),
+         resting_ecg_lvh = as.character(resting_ecg_lvh),
+         exercise_angina = as.character(exercise_angina),
+         st_slope_up = as.character(st_slope_up),
+         st_slope_flat = as.character(st_slope_flat),
+         st_slope_down = as.character(st_slope_down)
+         )
+
+glimpse(df_adjust)</code></pre>
+<pre><code>## Rows: 918
+## Columns: 19
+## $ age                 &lt;int&gt; 40, 49, 37, 48, 54, 39, 45, 54, 37, 48, 37, 58, 39…
+## $ sex                 &lt;chr&gt; &quot;0&quot;, &quot;1&quot;, &quot;0&quot;, &quot;1&quot;, &quot;0&quot;, &quot;0&quot;, &quot;1&quot;, &quot;0&quot;, &quot;0&quot;, &quot;1&quot;, …
+## $ resting_bp          &lt;int&gt; 140, 160, 130, 138, 150, 120, 130, 110, 140, 120, …
+## $ cholesterol         &lt;int&gt; 289, 180, 283, 214, 195, 339, 237, 208, 207, 284, …
+## $ fasting_bs          &lt;chr&gt; &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, …
+## $ max_hr              &lt;int&gt; 172, 156, 98, 108, 122, 170, 170, 142, 130, 120, 1…
+## $ oldpeak             &lt;dbl&gt; 0.0, 1.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 1.5, 0.0, …
+## $ chest_pain_type_ATA &lt;chr&gt; &quot;1&quot;, &quot;0&quot;, &quot;1&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;1&quot;, &quot;1&quot;, &quot;0&quot;, &quot;1&quot;, …
+## $ chest_pain_type_NAP &lt;chr&gt; &quot;0&quot;, &quot;1&quot;, &quot;0&quot;, &quot;0&quot;, &quot;1&quot;, &quot;1&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, …
+## $ chest_pain_type_ASY &lt;chr&gt; &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;1&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;1&quot;, &quot;0&quot;, …
+## $ chest_pain_type_TA  &lt;chr&gt; &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, …
+## $ resting_ecg_normal  &lt;chr&gt; &quot;1&quot;, &quot;1&quot;, &quot;0&quot;, &quot;1&quot;, &quot;1&quot;, &quot;1&quot;, &quot;1&quot;, &quot;1&quot;, &quot;1&quot;, &quot;1&quot;, …
+## $ resting_ecg_st      &lt;chr&gt; &quot;0&quot;, &quot;0&quot;, &quot;1&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, …
+## $ resting_ecg_lvh     &lt;chr&gt; &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, …
+## $ exercise_angina     &lt;chr&gt; &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;1&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;1&quot;, &quot;0&quot;, …
+## $ st_slope_up         &lt;chr&gt; &quot;1&quot;, &quot;0&quot;, &quot;1&quot;, &quot;0&quot;, &quot;1&quot;, &quot;1&quot;, &quot;1&quot;, &quot;1&quot;, &quot;0&quot;, &quot;1&quot;, …
+## $ st_slope_flat       &lt;chr&gt; &quot;0&quot;, &quot;1&quot;, &quot;0&quot;, &quot;1&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;1&quot;, &quot;0&quot;, …
+## $ st_slope_down       &lt;chr&gt; &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, …
+## $ heart_disease       &lt;fct&gt; 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1,…</code></pre>
+<p>Done!!!
+Lest’s explore the dataset.</p>
+</div>
+</div>
+<div id="spliting-dataset---traintest" class="section level2">
+<h2>Spliting dataset - Train/Test</h2>
+<p>Since our dataset is size-limited, I opted to separate 70% of the sample size for training.</p>
+<pre class="r"><code>set.seed(32)
+
+heart_initial_split &lt;- initial_split(df,
+                                     prop = 0.7,
+                                     strata = &quot;heart_disease&quot;)
+heart_initial_split</code></pre>
+<pre><code>## &lt;Training/Testing/Total&gt;
+## &lt;642/276/918&gt;</code></pre>
+<pre class="r"><code># train and test datasets
+heart_train &lt;- training(heart_initial_split)
+
+heart_test &lt;- testing(heart_initial_split)</code></pre>
+</div>
+<div id="exploratory-analysis" class="section level2">
+<h2>Exploratory analysis</h2>
+<div id="overview" class="section level3">
+<h3>Overview</h3>
+<pre class="r"><code>skimr::skim(heart_train)</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-7">Table 1: </span>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td align="left">Name</td>
+<td align="left">heart_train</td>
+</tr>
+<tr class="even">
+<td align="left">Number of rows</td>
+<td align="left">642</td>
+</tr>
+<tr class="odd">
+<td align="left">Number of columns</td>
+<td align="left">12</td>
+</tr>
+<tr class="even">
+<td align="left">_______________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Column type frequency:</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">character</td>
+<td align="left">5</td>
+</tr>
+<tr class="odd">
+<td align="left">factor</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left">numeric</td>
+<td align="left">6</td>
+</tr>
+<tr class="odd">
+<td align="left">________________________</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Group variables</td>
+<td align="left">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table>
+<colgroup>
+<col width="21%" />
+<col width="13%" />
+<col width="18%" />
+<col width="5%" />
+<col width="5%" />
+<col width="8%" />
+<col width="12%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">min</th>
+<th align="right">max</th>
+<th align="right">empty</th>
+<th align="right">n_unique</th>
+<th align="right">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">sex</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">chest_pain_type</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">4</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">resting_ecg</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">6</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">exercise_angina</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">st_slope</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">4</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: factor</strong></p>
+<table>
+<colgroup>
+<col width="20%" />
+<col width="14%" />
+<col width="20%" />
+<col width="11%" />
+<col width="12%" />
+<col width="21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="left">ordered</th>
+<th align="right">n_unique</th>
+<th align="left">top_counts</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">heart_disease</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+<td align="right">2</td>
+<td align="left">1: 355, 0: 287</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table style="width:100%;">
+<colgroup>
+<col width="15%" />
+<col width="11%" />
+<col width="15%" />
+<col width="7%" />
+<col width="7%" />
+<col width="5%" />
+<col width="7%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">p0</th>
+<th align="right">p25</th>
+<th align="right">p50</th>
+<th align="right">p75</th>
+<th align="right">p100</th>
+<th align="left">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">age</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">53.47</td>
+<td align="right">9.42</td>
+<td align="right">29.0</td>
+<td align="right">47.00</td>
+<td align="right">54.0</td>
+<td align="right">60.0</td>
+<td align="right">77.0</td>
+<td align="left">▂▅▇▇▂</td>
+</tr>
+<tr class="even">
+<td align="left">resting_bp</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">132.62</td>
+<td align="right">18.99</td>
+<td align="right">0.0</td>
+<td align="right">120.00</td>
+<td align="right">130.0</td>
+<td align="right">140.0</td>
+<td align="right">200.0</td>
+<td align="left">▁▁▃▇▁</td>
+</tr>
+<tr class="odd">
+<td align="left">cholesterol</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">196.50</td>
+<td align="right">107.87</td>
+<td align="right">0.0</td>
+<td align="right">175.25</td>
+<td align="right">221.0</td>
+<td align="right">263.0</td>
+<td align="right">603.0</td>
+<td align="left">▃▇▆▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">fasting_bs</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.23</td>
+<td align="right">0.42</td>
+<td align="right">0.0</td>
+<td align="right">0.00</td>
+<td align="right">0.0</td>
+<td align="right">0.0</td>
+<td align="right">1.0</td>
+<td align="left">▇▁▁▁▂</td>
+</tr>
+<tr class="odd">
+<td align="left">max_hr</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">137.17</td>
+<td align="right">25.99</td>
+<td align="right">70.0</td>
+<td align="right">119.00</td>
+<td align="right">138.0</td>
+<td align="right">157.0</td>
+<td align="right">202.0</td>
+<td align="left">▂▆▇▇▂</td>
+</tr>
+<tr class="even">
+<td align="left">oldpeak</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.87</td>
+<td align="right">1.07</td>
+<td align="right">-2.6</td>
+<td align="right">0.00</td>
+<td align="right">0.5</td>
+<td align="right">1.5</td>
+<td align="right">5.6</td>
+<td align="left">▁▇▆▁▁</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="missing-values" class="section level3">
+<h3>Missing values</h3>
+<pre class="r"><code>plot_missing(heart_train)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-8-1.png" width="1344" /></p>
+</div>
+<div id="checking-the-correlation-and-distribution-of-numerical-features" class="section level3">
+<h3>Checking the correlation and distribution of numerical features</h3>
+<pre class="r"><code>heart_train |&gt;  
+  select(where(is.numeric)) |&gt;  
+  cor(use = &quot;pairwise.complete.obs&quot;) |&gt; 
+  corrplot::corrplot(method = &quot;number&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-9-1.png" width="100%" /></p>
+<pre class="r"><code>heart_train |&gt;  
+  select(where(is.numeric), heart_disease) |&gt; 
+  ggpairs(aes(colour = as_factor(heart_disease)))</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-10-1.png" width="1344" /></p>
+<pre class="r"><code>heart_train |&gt;  
+  select(c(where(is.numeric), heart_disease)) |&gt; 
+  pivot_longer(-heart_disease, 
+               names_to = &quot;Feature&quot;,
+               values_to = &quot;Value&quot;) |&gt; 
+  ggplot(aes(y = as.factor(heart_disease), 
+             x = Value, 
+             fill = as.factor(heart_disease))) +
+  geom_boxplot() +
+  facet_wrap(~Feature,
+             scales = &quot;free_x&quot;) +
+  ggtitle(&quot;Heart_disease vs. Numeric Features&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-11-1.png" width="1536" /></p>
+<pre class="r"><code>heart_train |&gt;  
+  select(c(where(is.numeric), heart_disease)) |&gt; 
+  pivot_longer(-heart_disease, 
+               names_to = &quot;Feature&quot;,
+               values_to = &quot;Value&quot;) |&gt; 
+  ggplot(aes(x = Value, 
+             colour = as.factor(heart_disease))) +
+  stat_ecdf() +
+  facet_wrap(~Feature, scales = &quot;free_x&quot;) +
+  labs(title = &quot;Heart_disease vs. Numeric Features&quot;,
+       subtitle = &quot;Cumulative Distribution&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-12-1.png" width="1536" /></p>
+<pre class="r"><code>grafico_de_barras_das_vars_continuas &lt;- 
+  function(dados) {
+    dados |&gt;  
+    select(c(where(is.numeric), heart_disease)) |&gt; 
+    pivot_longer(-heart_disease,
+                 names_to = &quot;Feature&quot;,
+                 values_to = &quot;Value&quot;) |&gt; 
+    dplyr::group_by(Feature) |&gt; 
+    dplyr::mutate(
+      Value = factor(dplyr::ntile(Value, 10),
+                     levels = 1:10)
+    ) |&gt; 
+    dplyr::count(heart_disease, 
+                 Feature,
+                 Value) |&gt; 
+    ggplot(aes(y = (Value),
+               x = n,
+               fill = as.factor(heart_disease))) +
+    geom_col(position = &quot;fill&quot;) +
+    geom_label(aes(label = n),
+               position = position_fill(vjust = 0.5)) +
+    facet_wrap(~Feature,
+               scales = &quot;free_y&quot;,
+               ncol = 3) +
+    ggtitle(&quot;Heart_disease vs. Numeric Features&quot;)
+}
+
+grafico_de_barras_das_vars_continuas(heart_train)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-13-1.png" width="1536" /></p>
+</div>
+<div id="checking-the-distribution-of-categorical-features" class="section level3">
+<h3>Checking the distribution of categorical features</h3>
+<pre class="r"><code>contagens &lt;- 
+  heart_train |&gt;  
+  select(c(where(is.character),
+           heart_disease)) |&gt; 
+  pivot_longer(-heart_disease,
+               names_to = &quot;Feature&quot;,
+               values_to = &quot;Value&quot;) |&gt; 
+  count(heart_disease,
+        Feature,
+        Value)
+
+# tabela
+contagens |&gt; 
+  pivot_wider(names_from = heart_disease,
+              values_from = n) |&gt; 
+  DT::datatable()</code></pre>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-1" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14"],["chest_pain_type","chest_pain_type","chest_pain_type","chest_pain_type","exercise_angina","exercise_angina","resting_ecg","resting_ecg","resting_ecg","sex","sex","st_slope","st_slope","st_slope"],["ASY","ATA","NAP","TA","N","Y","LVH","Normal","ST","F","M","Down","Flat","Up"],[68,110,91,18,253,34,53,189,45,99,188,9,51,227],[271,19,49,16,132,223,71,206,78,37,318,33,270,52]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Feature<\/th>\n      <th>Value<\/th>\n      <th>0<\/th>\n      <th>1<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[3,4]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>contagens |&gt; 
+  ggplot(aes(y = Value,
+             x = n,
+             fill = as.factor(heart_disease))) +
+  geom_col(position = &quot;fill&quot;) +
+  geom_label(aes(label = n),
+             position = position_fill(vjust = 0.5)) +
+  facet_wrap(~Feature,
+             scales = &quot;free_y&quot;,
+             ncol = 3) +
+  ggtitle(&quot;Heart_disease vs. Categorical Features&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-15-1.png" width="1536" /></p>
+</div>
+</div>
+<div id="preprocessing-and-feature-engineering-steps-using-recipes-package" class="section level2">
+<h2>Preprocessing and Feature Engineering Steps using Recipes package</h2>
+<p>For numeric features, the values were normalized, multicollineariry higher than 0.8 were removed and missing values were imputed with median.</p>
+<p>For nominal features, missing values were imputed with more frequent value, and all features were transformed in a dummy feature.</p>
+<p>Features containing only zero were removed.</p>
+<p>The processed dataset can be seen below.</p>
+<pre class="r"><code>heart_recipe &lt;-
+  recipe(formula = heart_disease ~ ., heart_train) |&gt;
+  step_normalize(all_numeric_predictors()) |&gt; # normalize all continuous features
+  step_corr(all_numeric_predictors(), threshold = .8) |&gt;  # multicollinearity &lt;- r &gt; 0.8
+  step_impute_median(all_numeric_predictors()) |&gt;  # Processing missing continuous data - imputing median 
+  step_impute_mode(all_nominal_predictors()) |&gt; # Processing missing categorical data - imputing more frequent class
+  step_zv(all_predictors()) |&gt;  # removing variables that contain only zero (zero variance filter)
+  step_dummy(all_nominal_predictors()) # dummy - nominal predictors
+
+# Checking the result of the recipe (and whether the steps worked!)
+heart_recipe |&gt; 
+    prep() |&gt; 
+    bake(new_data = heart_train) |&gt; 
+    glimpse()</code></pre>
+<pre><code>## Rows: 642
+## Columns: 16
+## $ age                 &lt;dbl&gt; -1.4292242, -1.5353499, -0.8985962, 0.0565342, -0.…
+## $ resting_bp          &lt;dbl&gt; 0.3887070, -0.6642461, -0.1377696, -1.1907226, -0.…
+## $ cholesterol         &lt;dbl&gt; 0.85757304, 1.32110261, 0.37550228, 0.10665512, 0.…
+## $ fasting_bs          &lt;dbl&gt; -0.5517274, -0.5517274, -0.5517274, -0.5517274, -0…
+## $ max_hr              &lt;dbl&gt; 1.339869171, 1.262925121, 1.262925121, 0.185708420…
+## $ oldpeak             &lt;dbl&gt; -0.8149987, -0.8149987, -0.8149987, -0.8149987, -0…
+## $ heart_disease       &lt;fct&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+## $ sex_M               &lt;dbl&gt; 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0,…
+## $ chest_pain_type_ATA &lt;dbl&gt; 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1,…
+## $ chest_pain_type_NAP &lt;dbl&gt; 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0,…
+## $ chest_pain_type_TA  &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+## $ resting_ecg_Normal  &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1,…
+## $ resting_ecg_ST      &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,…
+## $ exercise_angina_Y   &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+## $ st_slope_Flat       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+## $ st_slope_Up         &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1,…</code></pre>
+<div id="definition-of-cross-validation" class="section level3">
+<h3>Definition of cross-validation</h3>
+<pre class="r"><code>heart_resamples &lt;- 
+  vfold_cv(heart_train,
+           v = 5, 
+           strata = heart_disease) # 5 folds
+
+heart_resamples$splits</code></pre>
+<pre><code>## [[1]]
+## &lt;Analysis/Assess/Total&gt;
+## &lt;513/129/642&gt;
+## 
+## [[2]]
+## &lt;Analysis/Assess/Total&gt;
+## &lt;513/129/642&gt;
+## 
+## [[3]]
+## &lt;Analysis/Assess/Total&gt;
+## &lt;514/128/642&gt;
+## 
+## [[4]]
+## &lt;Analysis/Assess/Total&gt;
+## &lt;514/128/642&gt;
+## 
+## [[5]]
+## &lt;Analysis/Assess/Total&gt;
+## &lt;514/128/642&gt;</code></pre>
+</div>
+</div>
+<div id="modeling---random-forest" class="section level2">
+<h2>Modeling - Random Forest</h2>
+<p>The hyperameters tuned were:</p>
+<div id="model" class="section level3">
+<h3>Model</h3>
+<pre class="r"><code># Modelo
+heart_rf_model &lt;- rand_forest(
+  mtry = tune(),
+  trees = tune(),
+  min_n = tune()
+) |&gt;
+  set_mode(&quot;classification&quot;) |&gt;
+  set_engine(&quot;ranger&quot;)</code></pre>
+</div>
+<div id="workflow" class="section level3">
+<h3>Workflow</h3>
+<pre class="r"><code># Workflow
+heart_rf_wf &lt;- workflow() |&gt;
+  add_model(heart_rf_model) |&gt;
+  add_recipe(heart_recipe)
+
+heart_rf_wf</code></pre>
+<pre><code>## ══ Workflow ════════════════════════════════════════════════════════════════════
+## Preprocessor: Recipe
+## Model: rand_forest()
+## 
+## ── Preprocessor ────────────────────────────────────────────────────────────────
+## 6 Recipe Steps
+## 
+## • step_normalize()
+## • step_corr()
+## • step_impute_median()
+## • step_impute_mode()
+## • step_zv()
+## • step_dummy()
+## 
+## ── Model ───────────────────────────────────────────────────────────────────────
+## Random Forest Model Specification (classification)
+## 
+## Main Arguments:
+##   mtry = tune()
+##   trees = tune()
+##   min_n = tune()
+## 
+## Computational engine: ranger</code></pre>
+</div>
+<div id="tuning" class="section level3">
+<h3>Tuning</h3>
+<pre class="r"><code># Tune
+heart_grid_rf &lt;- grid_random(
+  min_n(range = c(20, 80)),
+  mtry(range = c(4, 18)),
+  trees(range = c(200, 400))
+)
+
+heart_grid_rf |&gt; 
+  DT::datatable()</code></pre>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-2" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5"],[74,41,78,74,59],[15,5,12,5,15],[308,218,287,356,342]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>min_n<\/th>\n      <th>mtry<\/th>\n      <th>trees<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>doParallel::registerDoParallel(4)
+
+heart_rf_tune_grid &lt;-
+  tune_grid(
+  heart_rf_wf,
+  resamples = heart_resamples,
+  grid = heart_grid_rf,
+  metrics = metric_set(roc_auc, accuracy, sensitivity, specificity),
+  verbose = TRUE
+  )</code></pre>
+<pre class="r"><code>autoplot(heart_rf_tune_grid) +
+  theme_bw() +
+  theme(legend.position = &quot;top&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-22-1.png" width="100%" /></p>
+<pre class="r"><code># codes to look metrics --- remove comment to run
+# collect_metrics(heart_rf_tune_grid) |&gt; 
+#   filter(.metric == &quot;roc_auc&quot;) |&gt; 
+#   filter(mean == max(mean))
+# 
+# heart_rf_tune_grid |&gt; 
+#   select_best(metric = &quot;roc_auc&quot;)
+# 
+# show_best(heart_rf_tune_grid, n = 6)</code></pre>
+<pre class="r"><code>heart_rf_tune_grid |&gt; 
+  select_best(metric = &quot;roc_auc&quot;) |&gt; 
+  select(-&quot;.config&quot;) |&gt; 
+  DT::datatable(caption = htmltools::tags$caption(
+    style = &#39;caption-side: top; text-align: left;&#39;,
+    &quot;Best hyperparameters.&quot;))</code></pre>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-3" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-3">{"x":{"filter":"none","vertical":false,"caption":"<caption style=\"caption-side: top; text-align: left;\">Best hyperparameters.<\/caption>","data":[["1"],[5],[218],[41]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>mtry<\/th>\n      <th>trees<\/th>\n      <th>min_n<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code># best hiperparameters
+# glue::glue(&quot;The best number of trees was {dispneia_best_step1$trees} and learn_rate was {dispneia_best_step1$learn_rate}.&quot;)</code></pre>
+</div>
+</div>
+<div id="performance" class="section level2">
+<h2>Performance</h2>
+<pre class="r"><code>heart_rf_best_params &lt;- select_best(heart_rf_tune_grid,
+                                    metric =  &quot;roc_auc&quot;)
+
+heart_rf_best_wf &lt;- heart_rf_wf |&gt; 
+  finalize_workflow(heart_rf_best_params)
+
+heart_rf_last_fit &lt;- last_fit(object = heart_rf_best_wf,
+                              split =  heart_initial_split)</code></pre>
+<pre><code>## Warning: package &#39;ranger&#39; was built under R version 4.3.2</code></pre>
+<pre class="r"><code>heart_test_preds &lt;- 
+  bind_rows(
+    collect_predictions(heart_rf_last_fit) |&gt;
+    mutate(modelo = &quot;RandomForest&quot;)
+)
+
+heart_test_preds |&gt; 
+  select(
+    id, .pred_class, heart_disease
+  ) |&gt; 
+  mutate(
+    Prediction = if_else(.pred_class == heart_disease, &quot;RIGHT&quot;, &quot;WRONG&quot;)
+  ) |&gt; 
+  relocate(Prediction, .before = .pred_class) |&gt; 
+  DT::datatable()</code></pre>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-4" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-4">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76","77","78","79","80","81","82","83","84","85","86","87","88","89","90","91","92","93","94","95","96","97","98","99","100","101","102","103","104","105","106","107","108","109","110","111","112","113","114","115","116","117","118","119","120","121","122","123","124","125","126","127","128","129","130","131","132","133","134","135","136","137","138","139","140","141","142","143","144","145","146","147","148","149","150","151","152","153","154","155","156","157","158","159","160","161","162","163","164","165","166","167","168","169","170","171","172","173","174","175","176","177","178","179","180","181","182","183","184","185","186","187","188","189","190","191","192","193","194","195","196","197","198","199","200","201","202","203","204","205","206","207","208","209","210","211","212","213","214","215","216","217","218","219","220","221","222","223","224","225","226","227","228","229","230","231","232","233","234","235","236","237","238","239","240","241","242","243","244","245","246","247","248","249","250","251","252","253","254","255","256","257","258","259","260","261","262","263","264","265","266","267","268","269","270","271","272","273","274","275","276"],["train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split","train/test split"],["RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","WRONG","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","WRONG","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","WRONG","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","WRONG","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","WRONG","RIGHT","WRONG","WRONG","WRONG","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","WRONG","RIGHT","WRONG","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","WRONG","RIGHT","RIGHT","RIGHT"],["0","0","1","0","0","1","0","1","1","0","0","1","0","1","0","1","0","1","1","1","0","1","1","0","1","0","0","0","0","0","1","1","0","0","0","1","0","0","0","0","0","1","0","1","1","0","1","1","0","0","0","1","1","1","0","1","1","0","0","0","0","0","1","1","1","0","0","1","1","1","1","1","1","1","1","1","0","0","1","0","1","0","0","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","0","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","0","1","1","1","1","1","1","0","1","1","0","1","0","1","1","1","0","1","1","1","1","0","1","1","1","1","1","1","0","0","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","0","1","0","1","1","1","1","0","0","1","1","1","1","0","0","0","0","0","1","0","0","1","0","1","0","0","0","1","0","1","0","0","0","0","1","0","1","1","1","1","0","0","0","1","1","0","1","0","0","1","1","0","0","0","1","1","1","1","0","0","1","0","0","0","0","0","1","0","1","1","0","0","1","1","1","1","0","0","1","1","1","1","0","1","0","0","0","0","1","1","0","0","1","1","1","0","0","1","1"],["0","0","1","0","0","1","0","0","0","0","0","1","0","0","0","1","0","1","1","1","0","1","1","0","1","0","0","0","0","0","1","1","0","0","0","1","0","0","0","0","0","1","1","1","1","0","1","1","0","0","0","1","1","0","0","0","0","0","0","0","0","0","1","1","1","0","0","0","1","1","1","1","1","1","0","1","0","0","0","0","1","0","0","1","0","0","1","1","1","1","1","1","0","1","1","1","1","1","1","1","1","1","1","1","0","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","0","0","1","1","1","0","1","1","0","1","1","0","1","0","1","1","0","0","1","1","0","1","0","1","1","1","1","1","1","0","0","1","0","1","1","0","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","0","1","0","0","1","0","0","0","0","1","1","1","1","0","1","0","1","1","1","0","0","1","0","1","0","1","1","1","0","0","0","0","0","0","1","1","0","1","0","0","1","0","0","1","0","0","1","0","0","1","1","0","0","0","0","1","0","1","0","0","1","0","0","1","0","0","0","0","0","1","0","0","0","1","1","1","0","0","1","1","1","1","1","1","0","1","0","0","1","1","0","0","0","1","1","1","0","1","1"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>id<\/th>\n      <th>Prediction<\/th>\n      <th>.pred_class<\/th>\n      <th>heart_disease<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>## ROC
+heart_test_preds |&gt;
+  group_by(modelo) |&gt;
+  roc_curve(heart_disease, .pred_0) |&gt;
+  autoplot()+
+  theme(
+    legend.position = &quot;top&quot;,
+    legend.title = element_blank()
+  )</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-26-1.png" width="100%" /></p>
+</div>
+</div>
+<div id="conclusions" class="section level1">
+<h1>Conclusions</h1>
+<p>xxxxxxxxxxxxxxxxxxx</p>
+<p>Hope you enjoyed it!😜!</p>
+<p><img src="https://us.123rf.com/450wm/alesika/alesika2008/alesika200800157/153702004-see-you-soon-inscription-handwritten-lettering-illustration-black-vector-text-in-speech-bubble-simpl.jpg?ver=6" /></p>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<p><a href="https://bmcpulmmed.biomedcentral.com/articles/10.1186/s12890-022-02214-5">Srazzo et al., Long-term dyspnea, regional ventilation distribution and peripheral lung function in COVID-19 survivors: a 1 year follow-up study</a></p>
+<p><a href="https://www.statlearning.com/">An Introduction to Statistical Learning: with Applications in R</a></p>
+</div>

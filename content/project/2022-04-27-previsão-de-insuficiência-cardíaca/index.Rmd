@@ -4,15 +4,442 @@ categories:
 - Theme Features
 - R
 - package
-date: "2022-04-27"
+date: "2024-02-03"
 draft: false
-excerpt: Using database available at Kaggle, this project aims to model machine learning algoritms to predict heart failure
-  websites.
+excerpt: Using database available at Kaggle, this project used Random Forest to predict heart failure.
 featured: true
 layout: single-sidebar
 subtitle: "In progress"
 tags:
 - hugo-site
-title: Machine learning for Predicting Heart Failure.
+title: Using Random Forest to Predict Heart Failure.
 ---
 
+# Introduction
+xxxxxxxx 
+
+## Packages
+```{r message=FALSE, warning=FALSE}
+# Pacotes
+library(tidyverse)
+library(tidymodels)
+library(GGally)
+library(DataExplorer)
+library(doParallel)
+```
+
+## Reading dataset
+The dataset consist in a real dataset collected in the largest tertiary hospital of Latin America (Clinical Hospital, School of Medicine of the University of Sao Paulo). 
+
+```{r}
+# Lendo a base
+df <- read.csv('heart.csv') |> 
+  janitor::clean_names() |> #lowercase columns
+  mutate(
+    heart_disease = as.factor(heart_disease)
+  )
+```
+
+## Pre-processing
+xxxxxxx
+
+### Looking the outcome (heart disease)
+```{r}
+df |>
+  ggplot(mapping = aes(x = heart_disease, fill = sex)) +
+  geom_bar()
+```
+
+```{r}
+df |> 
+  count(heart_disease)
+```
+The number of classes of the outcome is balanced!
+
+### Data engineering 
+
+```{r}
+df_adjust <- 
+  df |>
+  mutate(
+    # sex for dummies
+    sex = case_when(sex == "M" ~ "0",
+                    sex == "F" ~ "1"),
+    # creating dummies for chest_pain_type
+    chest_pain_type_ATA = case_when(chest_pain_type == "ATA" ~ 1,
+                                    chest_pain_type != "ATA" ~ 0),
+    chest_pain_type_NAP = case_when(chest_pain_type == "NAP" ~ 1,
+                                    chest_pain_type != "NAP" ~ 0),
+    chest_pain_type_ASY = case_when(chest_pain_type == "ASY" ~ 1,
+                                    chest_pain_type != "ASY" ~ 0),
+    chest_pain_type_TA = case_when(chest_pain_type == "TA" ~ 1,
+                                    chest_pain_type != "TA" ~ 0),
+    # creating dummies for resting_ecg
+    resting_ecg_normal = case_when(resting_ecg == "Normal" ~ 1,
+                                   resting_ecg != "Normal" ~ 0),
+    resting_ecg_st = case_when(resting_ecg == "ST" ~ 1,
+                               resting_ecg != "ST" ~ 0),
+    resting_ecg_lvh = case_when(resting_ecg == "LVH" ~ 1,
+                                 resting_ecg != "LVH" ~ 0),
+    # creating dummies for exercise_angina
+    exercise_angina = case_when(exercise_angina == "Y" ~ 1,
+                                exercise_angina == "N" ~ 0),
+    # creating dummies for st_slope
+    st_slope_up = case_when(st_slope == "Up" ~ 1,
+                            st_slope != "Up" ~ 0),
+    st_slope_flat = case_when(st_slope == "Flat" ~ 1,
+                            st_slope != "Flat" ~ 0),
+    st_slope_down = case_when(st_slope == "Down" ~ 1,
+                            st_slope != "Down" ~ 0)
+    ) |>
+  # selecting features
+  select(age,
+         sex,
+         resting_bp,
+         cholesterol,
+         fasting_bs,
+         max_hr,
+         oldpeak,
+         chest_pain_type_ATA,
+         chest_pain_type_NAP,
+         chest_pain_type_ASY,
+         chest_pain_type_TA,
+         resting_ecg_normal,
+         resting_ecg_st,
+         resting_ecg_lvh,
+         exercise_angina,
+         st_slope_up,
+         st_slope_flat,
+         st_slope_down,
+         heart_disease
+         ) |>
+  #adjusting type of data
+  mutate(sex = as.character(sex),
+         fasting_bs = as.character(fasting_bs),
+         chest_pain_type_ATA = as.character(chest_pain_type_ATA),
+         chest_pain_type_NAP = as.character(chest_pain_type_NAP),
+         chest_pain_type_ASY = as.character(chest_pain_type_ASY),
+         chest_pain_type_TA = as.character(chest_pain_type_TA),
+         resting_ecg_normal = as.character(resting_ecg_normal),
+         resting_ecg_st = as.character(resting_ecg_st),
+         resting_ecg_lvh = as.character(resting_ecg_lvh),
+         exercise_angina = as.character(exercise_angina),
+         st_slope_up = as.character(st_slope_up),
+         st_slope_flat = as.character(st_slope_flat),
+         st_slope_down = as.character(st_slope_down)
+         )
+
+glimpse(df_adjust)
+```
+
+Done!!!
+Lest's explore the dataset.
+
+## Spliting dataset - Train/Test
+Since our dataset is size-limited, I opted to separate 70% of the sample size for training.
+
+```{r}
+set.seed(32)
+
+heart_initial_split <- initial_split(df,
+                                     prop = 0.7,
+                                     strata = "heart_disease")
+heart_initial_split
+
+# train and test datasets
+heart_train <- training(heart_initial_split)
+
+heart_test <- testing(heart_initial_split)
+```
+
+## Exploratory analysis 
+### Overview
+```{r}
+skimr::skim(heart_train)
+```
+
+### Missing values
+
+```{r, fig.height=12, fig.width=14, message=FALSE, warning=FALSE}
+plot_missing(heart_train)
+```
+
+### Checking the correlation and distribution of numerical features
+
+```{r, out.width="100%"}
+heart_train |>  
+  select(where(is.numeric)) |>  
+  cor(use = "pairwise.complete.obs") |> 
+  corrplot::corrplot(method = "number")
+```
+```{r, fig.height=14, fig.width=14, message=FALSE, warning=FALSE}
+heart_train |>  
+  select(where(is.numeric), heart_disease) |> 
+  ggpairs(aes(colour = as_factor(heart_disease)))
+```
+
+```{r, fig.height=14, fig.width=16}
+heart_train |>  
+  select(c(where(is.numeric), heart_disease)) |> 
+  pivot_longer(-heart_disease, 
+               names_to = "Feature",
+               values_to = "Value") |> 
+  ggplot(aes(y = as.factor(heart_disease), 
+             x = Value, 
+             fill = as.factor(heart_disease))) +
+  geom_boxplot() +
+  facet_wrap(~Feature,
+             scales = "free_x") +
+  ggtitle("Heart_disease vs. Numeric Features")
+```
+
+```{r, fig.height=14, fig.width=16}
+heart_train |>  
+  select(c(where(is.numeric), heart_disease)) |> 
+  pivot_longer(-heart_disease, 
+               names_to = "Feature",
+               values_to = "Value") |> 
+  ggplot(aes(x = Value, 
+             colour = as.factor(heart_disease))) +
+  stat_ecdf() +
+  facet_wrap(~Feature, scales = "free_x") +
+  labs(title = "Heart_disease vs. Numeric Features",
+       subtitle = "Cumulative Distribution")
+```
+
+```{r, fig.height=14, fig.width=16}
+grafico_de_barras_das_vars_continuas <- 
+  function(dados) {
+    dados |>  
+    select(c(where(is.numeric), heart_disease)) |> 
+    pivot_longer(-heart_disease,
+                 names_to = "Feature",
+                 values_to = "Value") |> 
+    dplyr::group_by(Feature) |> 
+    dplyr::mutate(
+      Value = factor(dplyr::ntile(Value, 10),
+                     levels = 1:10)
+    ) |> 
+    dplyr::count(heart_disease, 
+                 Feature,
+                 Value) |> 
+    ggplot(aes(y = (Value),
+               x = n,
+               fill = as.factor(heart_disease))) +
+    geom_col(position = "fill") +
+    geom_label(aes(label = n),
+               position = position_fill(vjust = 0.5)) +
+    facet_wrap(~Feature,
+               scales = "free_y",
+               ncol = 3) +
+    ggtitle("Heart_disease vs. Numeric Features")
+}
+
+grafico_de_barras_das_vars_continuas(heart_train)
+```
+
+### Checking the distribution of categorical features
+```{r, fig.height=8}
+contagens <- 
+  heart_train |>  
+  select(c(where(is.character),
+           heart_disease)) |> 
+  pivot_longer(-heart_disease,
+               names_to = "Feature",
+               values_to = "Value") |> 
+  count(heart_disease,
+        Feature,
+        Value)
+
+# tabela
+contagens |> 
+  pivot_wider(names_from = heart_disease,
+              values_from = n) |> 
+  DT::datatable()
+```
+
+```{r, fig.height=16, fig.width=16}
+contagens |> 
+  ggplot(aes(y = Value,
+             x = n,
+             fill = as.factor(heart_disease))) +
+  geom_col(position = "fill") +
+  geom_label(aes(label = n),
+             position = position_fill(vjust = 0.5)) +
+  facet_wrap(~Feature,
+             scales = "free_y",
+             ncol = 3) +
+  ggtitle("Heart_disease vs. Categorical Features")
+```
+
+## Preprocessing and Feature Engineering Steps using Recipes package
+
+For numeric features, the values were normalized, multicollineariry higher than 0.8 were removed and missing values were imputed with median.
+
+For nominal features, missing values were imputed with more frequent value, and all features were transformed in a dummy feature.
+
+Features containing only zero were removed.
+
+The processed dataset can be seen below.
+
+```{r}
+heart_recipe <-
+  recipe(formula = heart_disease ~ ., heart_train) |>
+  step_normalize(all_numeric_predictors()) |> # normalize all continuous features
+  step_corr(all_numeric_predictors(), threshold = .8) |>  # multicollinearity <- r > 0.8
+  step_impute_median(all_numeric_predictors()) |>  # Processing missing continuous data - imputing median 
+  step_impute_mode(all_nominal_predictors()) |> # Processing missing categorical data - imputing more frequent class
+  step_zv(all_predictors()) |>  # removing variables that contain only zero (zero variance filter)
+  step_dummy(all_nominal_predictors()) # dummy - nominal predictors
+
+# Checking the result of the recipe (and whether the steps worked!)
+heart_recipe |> 
+    prep() |> 
+    bake(new_data = heart_train) |> 
+    glimpse()
+```
+
+### Definition of cross-validation
+```{r}
+heart_resamples <- 
+  vfold_cv(heart_train,
+           v = 5, 
+           strata = heart_disease) # 5 folds
+
+heart_resamples$splits
+
+```
+
+## Modeling - Random Forest
+The hyperameters tuned were:
+
+### Model
+```{r}
+# Modelo
+heart_rf_model <- rand_forest(
+  mtry = tune(),
+  trees = tune(),
+  min_n = tune()
+) |>
+  set_mode("classification") |>
+  set_engine("ranger")
+```
+
+### Workflow
+```{r}
+# Workflow
+heart_rf_wf <- workflow() |>
+  add_model(heart_rf_model) |>
+  add_recipe(heart_recipe)
+
+heart_rf_wf
+```
+
+### Tuning
+```{r}
+# Tune
+heart_grid_rf <- grid_random(
+  min_n(range = c(20, 80)),
+  mtry(range = c(4, 18)),
+  trees(range = c(200, 400))
+)
+
+heart_grid_rf |> 
+  DT::datatable()
+```
+
+```{r warning=FALSE}
+doParallel::registerDoParallel(4)
+
+heart_rf_tune_grid <-
+  tune_grid(
+  heart_rf_wf,
+  resamples = heart_resamples,
+  grid = heart_grid_rf,
+  metrics = metric_set(roc_auc, accuracy, sensitivity, specificity),
+  verbose = TRUE
+  )
+```
+
+```{r warning=FALSE, out.width="100%"}
+autoplot(heart_rf_tune_grid) +
+  theme_bw() +
+  theme(legend.position = "top")
+
+# codes to look metrics --- remove comment to run
+# collect_metrics(heart_rf_tune_grid) |> 
+#   filter(.metric == "roc_auc") |> 
+#   filter(mean == max(mean))
+# 
+# heart_rf_tune_grid |> 
+#   select_best(metric = "roc_auc")
+# 
+# show_best(heart_rf_tune_grid, n = 6)
+```
+```{r}
+heart_rf_tune_grid |> 
+  select_best(metric = "roc_auc") |> 
+  select(-".config") |> 
+  DT::datatable(caption = htmltools::tags$caption(
+    style = 'caption-side: top; text-align: left;',
+    "Best hyperparameters."))
+```
+
+
+```{r}
+# best hiperparameters
+# glue::glue("The best number of trees was {dispneia_best_step1$trees} and learn_rate was {dispneia_best_step1$learn_rate}.")
+```
+
+## Performance
+```{r out.width='100%'}
+heart_rf_best_params <- select_best(heart_rf_tune_grid,
+                                    metric =  "roc_auc")
+
+heart_rf_best_wf <- heart_rf_wf |> 
+  finalize_workflow(heart_rf_best_params)
+
+heart_rf_last_fit <- last_fit(object = heart_rf_best_wf,
+                              split =  heart_initial_split)
+
+heart_test_preds <- 
+  bind_rows(
+    collect_predictions(heart_rf_last_fit) |>
+    mutate(modelo = "RandomForest")
+)
+
+heart_test_preds |> 
+  select(
+    id, .pred_class, heart_disease
+  ) |> 
+  mutate(
+    Prediction = if_else(.pred_class == heart_disease, "RIGHT", "WRONG")
+  ) |> 
+  relocate(Prediction, .before = .pred_class) |> 
+  DT::datatable()
+```
+
+```{r out.width='100%'}
+## ROC
+heart_test_preds |>
+  group_by(modelo) |>
+  roc_curve(heart_disease, .pred_0) |>
+  autoplot()+
+  theme(
+    legend.position = "top",
+    legend.title = element_blank()
+  )
+```
+
+# Conclusions
+xxxxxxxxxxxxxxxxxxx
+
+Hope you enjoyed it!`r emojifont::emoji("stuck_out_tongue_winking_eye")`!
+
+![](https://us.123rf.com/450wm/alesika/alesika2008/alesika200800157/153702004-see-you-soon-inscription-handwritten-lettering-illustration-black-vector-text-in-speech-bubble-simpl.jpg?ver=6)
+
+
+# References
+[Srazzo et al., Long-term dyspnea, regional ventilation distribution and peripheral lung function in COVID-19 survivors: a 1 year follow-up study](https://bmcpulmmed.biomedcentral.com/articles/10.1186/s12890-022-02214-5)
+
+[An Introduction to Statistical Learning: with Applications in R](https://www.statlearning.com/)

@@ -7,7 +7,6 @@ categories:
 date: "2024-01-06"
 draft: false
 excerpt: This project used XGboost to predict dyspnea in COVID-19 survivors 6-9 months after hospital discharge. 
-  websites.
 featured: true
 layout: single-sidebar
 subtitle: "In progress"
