@@ -6,17 +6,24 @@ categories:
 - package
 date: "2024-02-03"
 draft: false
-excerpt: Using database available at Kaggle, this project used Random Forest to predict heart failure.
+excerpt: Using database available at Kaggle, this project used Random Forest to predict heart disease.
 featured: true
 layout: single-sidebar
 subtitle: "In progress"
 tags:
 - hugo-site
-title: Using Random Forest to Predict Heart Failure.
+title: Using Random Forest to Predict Heart Disease
 ---
 
 # Introduction
-xxxxxxxx 
+
+Heart disease, also known as cardiovascular disease (CVDs), encompasses a range of conditions that affect the heart and blood vessels. It is the leading cause of death globally. It consists to a group of disorders that affect the heart and blood vessels such as coronary artery disease, stroke, peripheral artery disease, hypertension and, heart failure. It is noteworthy that CVDs are the number 1 cause of death globally, taking an estimated 17.9 million lives each year, which accounts for 31% of all deaths worldwide.
+
+Heart disease are the number 1 cause of death globally, taking an estimated 17.9 million lives each year, which accounts for 31% of all deaths worldwide. Indeed, CVDs can significantly impact mortality rates, especially if left untreated or poorly managed. Early diagnosis and management of risk factors can help prevent heart disease and improve outcomes for those living with the condition.
+
+Random Forest is a popular machine learning algorithm used for both classification and regression tasks. It consists of multiple random decision trees. Briefly, two types of randomnesses are built into the trees. First, each tree is built on a random sample from the original data. Second, at each tree node, a subset of features is randomly selected to generate the best split. Thus, it is reasonable to assume that this machine learning algorithm may be useful for the early detection and treatment of heart disease and, finally, for avoiding complications and improving outcomes.
+
+Herein, we utilized the Random Forest to predict cardiovascular disease.
 
 ## Packages
 ```{r message=FALSE, warning=FALSE}
@@ -29,7 +36,38 @@ library(doParallel)
 ```
 
 ## Reading dataset
-The dataset consist in a real dataset collected in the largest tertiary hospital of Latin America (Clinical Hospital, School of Medicine of the University of Sao Paulo). 
+
+This data set dates from 1988 and consists of four databases: Cleveland, Hungary, Switzerland, and Long Beach V. It contains 76 attributes, including the predicted attribute, but all published experiments refer to using a subset of 14 of them. The "target" field refers to the presence of heart disease in the patient. It is integer valued 0 = no disease and 1 = disease. 
+
+The features are following:
+
+- age;
+
+- sex;
+
+- chest pain type (4 values);
+
+- resting blood pressure;
+
+- serum cholestoral in mg/dl;
+
+- fasting blood sugar > 120 mg/dl;
+
+- resting electrocardiographic results (values 0,1,2);
+
+- maximum heart rate achieved;
+
+- exercise induced angina;
+
+- oldpeak = ST depression induced by exercise relative to rest;
+
+- the slope of the peak exercise ST segment;
+
+- number of major vessels (0-3) colored by flourosopy;
+
+- thal: 0 = normal; 1 = fixed defect; 2 = reversable defect.
+
+Let's load the dataset!
 
 ```{r}
 # Lendo a base
@@ -41,24 +79,26 @@ df <- read.csv('heart.csv') |>
 ```
 
 ## Pre-processing
-xxxxxxx
+
+Pre-processing of data is a crucial step for preparing and cleaning the dataset before feeding it into a machine learning model. It plays a significant role in improving the performance, accuracy, and reliability of the model. Therefore, let's deep into the dataset!!!
 
 ### Looking the outcome (heart disease)
-```{r}
+```{r, fig.height=12, fig.width=14}
 df |>
   ggplot(mapping = aes(x = heart_disease, fill = sex)) +
-  geom_bar()
+  geom_bar() + 
+  theme_bw()
 ```
 
 ```{r}
 df |> 
   count(heart_disease)
 ```
-The number of classes of the outcome is balanced!
+The number of classes of the outcome seems balanced!
 
 ### Data engineering 
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 df_adjust <- 
   df |>
   mutate(
@@ -136,7 +176,7 @@ Done!!!
 Lest's explore the dataset.
 
 ## Spliting dataset - Train/Test
-Since our dataset is size-limited, I opted to separate 70% of the sample size for training.
+Since our dataset is size-limited (n-918), I opted to separate 70% of the sample size for training.
 
 ```{r}
 set.seed(32)
@@ -161,12 +201,12 @@ skimr::skim(heart_train)
 ### Missing values
 
 ```{r, fig.height=12, fig.width=14, message=FALSE, warning=FALSE}
-plot_missing(heart_train)
+plot_missing(heart_train,ggtheme = theme_bw())
 ```
 
 ### Checking the correlation and distribution of numerical features
 
-```{r, out.width="100%"}
+```{r, fig.height=12, fig.width=14, message=FALSE, warning=FALSE}
 heart_train |>  
   select(where(is.numeric)) |>  
   cor(use = "pairwise.complete.obs") |> 
@@ -175,7 +215,12 @@ heart_train |>
 ```{r, fig.height=14, fig.width=14, message=FALSE, warning=FALSE}
 heart_train |>  
   select(where(is.numeric), heart_disease) |> 
-  ggpairs(aes(colour = as_factor(heart_disease)))
+  ggpairs(aes(colour = as_factor(heart_disease))) +
+    theme_bw() +
+    theme(
+      legend.position = "top",
+      legend.title = element_blank()
+      )
 ```
 
 ```{r, fig.height=14, fig.width=16}
@@ -190,7 +235,12 @@ heart_train |>
   geom_boxplot() +
   facet_wrap(~Feature,
              scales = "free_x") +
-  ggtitle("Heart_disease vs. Numeric Features")
+  ggtitle("Heart_disease vs. Numeric Features") +
+    theme_bw() +
+    theme(
+      legend.position = "top",
+      legend.title = element_blank()
+      )
 ```
 
 ```{r, fig.height=14, fig.width=16}
@@ -204,7 +254,12 @@ heart_train |>
   stat_ecdf() +
   facet_wrap(~Feature, scales = "free_x") +
   labs(title = "Heart_disease vs. Numeric Features",
-       subtitle = "Cumulative Distribution")
+       subtitle = "Cumulative Distribution") +
+    theme_bw() +
+    theme(
+      legend.position = "top",
+      legend.title = element_blank()
+      )
 ```
 
 ```{r, fig.height=14, fig.width=16}
@@ -232,7 +287,12 @@ grafico_de_barras_das_vars_continuas <-
     facet_wrap(~Feature,
                scales = "free_y",
                ncol = 3) +
-    ggtitle("Heart_disease vs. Numeric Features")
+    ggtitle("Heart_disease vs. Numeric Features") +
+    theme_bw() +
+    theme(
+      legend.position = "top",
+      legend.title = element_blank()
+      )
 }
 
 grafico_de_barras_das_vars_continuas(heart_train)
@@ -269,7 +329,12 @@ contagens |>
   facet_wrap(~Feature,
              scales = "free_y",
              ncol = 3) +
-  ggtitle("Heart_disease vs. Categorical Features")
+  ggtitle("Heart_disease vs. Categorical Features") +
+    theme_bw() +
+    theme(
+      legend.position = "top",
+      legend.title = element_blank()
+      )
 ```
 
 ## Preprocessing and Feature Engineering Steps using Recipes package
@@ -295,11 +360,14 @@ heart_recipe <-
 # Checking the result of the recipe (and whether the steps worked!)
 heart_recipe |> 
     prep() |> 
-    bake(new_data = heart_train) |> 
+    bake(new_data = heart_train) |>
     glimpse()
 ```
 
 ### Definition of cross-validation
+
+The cross-validation was set-up in 5 folds.
+
 ```{r}
 heart_resamples <- 
   vfold_cv(heart_train,
@@ -312,6 +380,12 @@ heart_resamples$splits
 
 ## Modeling - Random Forest
 The hyperameters tuned were:
+
+- mtry: It refers to an integer for the number of predictors that will be randomly sampled at each split when creating the tree models;
+
+- trees: It refers to an integer for the number of trees contained in the ensemble;
+
+- min_n: It refers to an integer for the minimum number of data points in a node that are required for the node to be split further.
 
 ### Model
 ```{r}
@@ -336,6 +410,9 @@ heart_rf_wf
 ```
 
 ### Tuning
+
+A Random grid was used for tuning the hyperparameters.
+
 ```{r}
 # Tune
 heart_grid_rf <- grid_random(
@@ -363,9 +440,7 @@ heart_rf_tune_grid <-
 
 ```{r warning=FALSE, out.width="100%"}
 autoplot(heart_rf_tune_grid) +
-  theme_bw() +
-  theme(legend.position = "top")
-
+  theme_bw()
 # codes to look metrics --- remove comment to run
 # collect_metrics(heart_rf_tune_grid) |> 
 #   filter(.metric == "roc_auc") |> 
@@ -385,14 +460,8 @@ heart_rf_tune_grid |>
     "Best hyperparameters."))
 ```
 
-
-```{r}
-# best hiperparameters
-# glue::glue("The best number of trees was {dispneia_best_step1$trees} and learn_rate was {dispneia_best_step1$learn_rate}.")
-```
-
 ## Performance
-```{r out.width='100%'}
+```{r warning=FALSE, out.width='100%'}
 heart_rf_best_params <- select_best(heart_rf_tune_grid,
                                     metric =  "roc_auc")
 
@@ -432,7 +501,9 @@ heart_test_preds |>
 ```
 
 # Conclusions
-xxxxxxxxxxxxxxxxxxx
+In conclusion, Random Forest proved effective in predicting heart disease. Therefore, this artificial intelligence approach can be implemented in clinical settings to assist healthcare professionals in the early detection of heart disease.
+
+It is noteworthy  that the analyses performed herein are not intended to be used in practice. However, these analysis reinforce the utilization of ML algorithm in the health care.
 
 Hope you enjoyed it!`r emojifont::emoji("stuck_out_tongue_winking_eye")`!
 
@@ -440,6 +511,6 @@ Hope you enjoyed it!`r emojifont::emoji("stuck_out_tongue_winking_eye")`!
 
 
 # References
-[Srazzo et al., Long-term dyspnea, regional ventilation distribution and peripheral lung function in COVID-19 survivors: a 1 year follow-up study](https://bmcpulmmed.biomedcentral.com/articles/10.1186/s12890-022-02214-5)
+[An Introduction to Random Forest](https://towardsdatascience.com/random-forest-3a55c3aca46d)
 
-[An Introduction to Statistical Learning: with Applications in R](https://www.statlearning.com/)
+[Heart Disease Dataset - Public Health Dataset](https://www.kaggle.com/datasets/johnsmith88/heart-disease-dataset)
