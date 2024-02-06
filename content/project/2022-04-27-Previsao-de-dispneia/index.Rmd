@@ -1,15 +1,12 @@
 ---
 author: Saulo Gil
-categories:
-- Theme Features
-- R
-- package
+categories: []
 date: "2024-01-06"
 draft: false
 excerpt: This project used XGboost to predict dyspnea in COVID-19 survivors 6-9 months after hospital discharge. 
 featured: true
 layout: single-sidebar
-subtitle: "In progress"
+subtitle: ""
 tags:
 - hugo-site
 title: Using XGboost to Predict Dyspnea in COVID-19 Survivors

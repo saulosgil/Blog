@@ -1,15 +1,12 @@
 ---
 author: Saulo Gil
-categories:
-- Theme Features
-- R
-- package
+categories: []
 date: "2024-02-03"
 draft: false
 excerpt: Using database available at Kaggle, this project used Random Forest to predict heart disease.
 featured: true
 layout: single-sidebar
-subtitle: "In progress"
+subtitle: ""
 tags:
 - hugo-site
 title: Using Random Forest to Predict Heart Disease
