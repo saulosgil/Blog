@@ -1,7 +1,7 @@
 ---
 author: Saulo Gil
 categories: []
-date: "2024-02-03"
+date: "2024-02-06"
 draft: false
 excerpt: Using database available at Kaggle, this project used Random Forest to predict heart disease.
 featured: true
