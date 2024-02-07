@@ -11,7 +11,7 @@ headline: |
  
  - I'm a `Phd` in Science from the `University of São Paulo`;
  
- - I'm currently a `researcher` at `HCFMUSP` (Post-doctoral fellow) investigating interventions to counteract muscle atrophy in catabolic conditions (e.g., aging, obesity and bedrest);
+ - I'm currently a `researcher` at `HCFMUSP` investigating interventions to counteract muscle atrophy in catabolic conditions (e.g., aging, obesity and bedrest);
  
  - I'm an `associate professor` at Physical Education Department and Master's Degree course in Health Science at Universidade Santo Amaro (UNISA);
  

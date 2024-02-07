@@ -2,7 +2,7 @@
 action_label: READ MORE &rarr;
 action_link: /about
 action_type: text
-description: The content of this site involves the dissemination of my scientific publications, opinion articles and projects in the area of data science using R language.
+description: The content of this site involves the dissemination of my scientific publications, opinion articles and projects in the area of data science.
 image_left: true
 images:
 - img/dna.jpeg

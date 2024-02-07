@@ -1,0 +1,341 @@
+---
+title: "Commonly Plots with Seaborn (Python)"
+subtitle: ""
+excerpt: ""
+date: '2024-02-07'
+author: Saulo Gil
+draft: false
+images:
+series:
+layout: single
+slug: []
+categories: []
+tags: []
+---
+
+
+
+<div id="commonly-plots-with-seaborn-python" class="section level1">
+<h1>Commonly Plots with Seaborn (Python)</h1>
+<!-- badges: start -->
+<!-- badges: end -->
+<p>Data visualization is the graphical representation of data and information. It involves the creation of visual elements such as charts, graphs, maps, and dashboards to communicate complex data sets in a more understandable and insightful manner. Data visualization enables users to analyze, interpret, and understand patterns, trends, and relationships within data more effectively than they could through raw numbers or text alone.</p>
+<p>The primary goals of data visualization include:</p>
+<ol style="list-style-type: decimal">
+<li><p>Clarity: Presenting data in a clear and understandable format, making complex information more accessible.</p></li>
+<li><p>Insight: Facilitating the discovery of patterns, trends, and relationships within the data that might not be immediately apparent.</p></li>
+<li><p>Communication: Enhancing communication of insights and findings to stakeholders, decision-makers, and the general audience.</p></li>
+<li><p>Decision-making: Empowering informed decision-making based on data-driven insights.</p></li>
+</ol>
+<p>Data visualization can be achieved using various tools and techniques, ranging from simple charts created in spreadsheet software to sophisticated interactive visualizations developed using specialized software and programming languages like R, JavaScript (with libraries like D3.js), and Python (with libraries like Matplotlib, Seaborn, Plotly).</p>
+<p>Seaborn is a Python data visualization library based on Matplotlib. It provides a high-level interface for creating attractive statistical graphics. Seaborn is built on top of Matplotlib and integrates closely with Pandas data structures, making it particularly useful for visualizing datasets stored in Pandas DataFrames.</p>
+<p>In this post, I show 10 commonly plots using Seaborn library from Python.</p>
+<ol style="list-style-type: decimal">
+<li><p>Bar Plots</p></li>
+<li><p>Count Plots</p></li>
+<li><p>Histograms</p></li>
+<li><p>Cat Plots (Box, Violin, Swarm, Boxen)</p></li>
+<li><p>Multiple Plots using FacetGrid</p></li>
+<li><p>Joint Plots</p></li>
+<li><p>KDE Plots</p></li>
+<li><p>Pairplots</p></li>
+<li><p>Heatmaps</p></li>
+<li><p>Scatter Plots.</p></li>
+</ol>
+<div id="so-lets-to-do-it" class="section level2">
+<h2>SO, LET’S TO DO IT</h2>
+</div>
+<div id="libraries-required" class="section level2">
+<h2>Libraries required</h2>
+<pre class="r"><code>library(reticulate) # R package to run Python scripts</code></pre>
+<pre class="python"><code># Python libraries
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib
+import matplotlib.pyplot as plt
+
+%matplotlib inline</code></pre>
+</div>
+<div id="import-dataset" class="section level2">
+<h2>Import dataset</h2>
+<pre class="python"><code>exercise = sns.load_dataset(&#39;exercise&#39;)
+iris = sns.load_dataset(&#39;iris&#39;)
+penguins = sns.load_dataset(&#39;penguins&#39;)
+mpg = sns.load_dataset(&#39;mpg&#39;)
+titanic = sns.load_dataset(&#39;titanic&#39;)
+tips = sns.load_dataset(&#39;tips&#39;)</code></pre>
+</div>
+</div>
+<div id="bar-plots" class="section level1">
+<h1>1. Bar Plots</h1>
+<p>Bar plots offer a means to visually represent diverse data sets, including counts, frequencies, percentages, or averages.</p>
+<p>They prove especially valuable for illustrating and contrasting data across various categories.</p>
+<p>We used titanic dataset to some bar plots</p>
+<div id="categorical-comparison" class="section level3">
+<h3><em>Categorical comparison</em></h3>
+<pre class="python"><code># Simple bar plot
+sns.barplot(data=titanic, x=&#39;who&#39;, y=&#39;age&#39;, estimator=&#39;mean&#39;, errorbar=None, palette=&#39;viridis&#39;)
+plt.title(&#39;Simple Barplot&#39;)
+plt.xlabel(&#39;Person&#39;)
+plt.ylabel(&#39;Average&#39;)
+plt.show()</code></pre>
+<p><img src="images/output_10_1.png" /></p>
+</div>
+<div id="proportional-representation-through-stacked-bar-charts" class="section level3">
+<h3><em>Proportional Representation through Stacked Bar Charts</em></h3>
+<pre class="python"><code># prepare dataset - groupby
+data = titanic.groupby(&#39;embark_town&#39;).agg({&#39;who&#39;:&#39;count&#39;,&#39;sex&#39;: lambda x: (x==&#39;male&#39;).sum()}).reset_index()
+data.rename(columns={&#39;who&#39;:&#39;total&#39;, &#39;sex&#39;:&#39;male&#39;}, inplace=True)
+data.sort_values(&#39;total&#39;, inplace=True))
+
+# Barplot Showing Part of Total
+sns.set_color_codes(&quot;pastel&quot;)
+sns.barplot(x=&quot;total&quot;, y=&quot;embark_town&quot;, data=data,
+            label=&quot;Female&quot;, color=&quot;b&quot;)  
+sns.set_color_codes(&quot;muted&quot;)
+sns.barplot(x=&quot;male&quot;, y=&quot;embark_town&quot;, data=data,
+            label=&quot;Male&quot;, color=&quot;b&quot;)  
+plt.title(&#39;Barplot Showing Part of Total&#39;)
+plt.xlabel(&#39;Number of Persons&#39;)
+plt.legend(loc=&#39;upper right&#39;)
+plt.show()</code></pre>
+<p><img src="images/output_13_0.png" /></p>
+</div>
+<div id="comparison-of-subcategories-within-each-category-through-clustered-bar-plots" class="section level3">
+<h3><em>Comparison of Subcategories within each category through Clustered Bar Plots</em></h3>
+<pre class="python"><code># Clustered barplot
+sns.barplot(data=titanic, x=&#39;class&#39;, y=&#39;age&#39;, hue=&#39;sex&#39;, estimator=&#39;mean&#39;, errorbar=None, palette=&#39;viridis&#39;)
+plt.title(&#39;Clustered Barplot&#39;)
+plt.xlabel(&#39;Class&#39;)
+plt.ylabel(&#39;Average Age&#39;)
+plt.show()</code></pre>
+<p><img src="images/output_15_1.png" />
+# 2. Count Plots
+A count plot exhibits the occurrences of each category within a categorical variable.</p>
+<p>On the x-axis lie the variable’s categories, while the y-axis displays the count or frequency of each category.</p>
+</div>
+<div id="frequency-distribution-of-categorical-variables" class="section level3">
+<h3><em>Frequency Distribution of categorical variables</em></h3>
+<pre class="python"><code># Simple Countplot
+sns.countplot(data=titanic, x=&#39;alive&#39;, palette=&#39;viridis&#39;)
+plt.title(&#39;Simple Countplot&#39;)
+plt.show()</code></pre>
+<p><img src="images/output_19_1.png" /></p>
+</div>
+<div id="relationship-between-different-categorical-variables" class="section level3">
+<h3><em>Relationship between different categorical variables</em></h3>
+<pre class="python"><code># Clustered Countplot
+sns.countplot(data=titanic, y=&quot;who&quot;, hue=&quot;alive&quot;, palette=&#39;viridis&#39;)
+plt.title(&#39;Clustered Countplot&#39;)
+plt.show()</code></pre>
+</div>
+</div>
+<div id="histograms" class="section level1">
+<h1>3. Histograms</h1>
+<p>Histograms visually depict the distribution of a dataset, offering insights into its key characteristics such as normality, skewness, or presence of multiple peaks.</p>
+<p>They showcase the frequency or count of observations across various intervals or “bins” of the data.</p>
+<p>Let’s use iris dataset.</p>
+<div id="visualize-the-shape-centre-range-and-spread-of-a-continuousnumeric-variable-and-to-identify-any-patterns-or-outliers" class="section level3">
+<h3><em>Visualize the shape, centre, range and spread of a continuous/numeric variable and to identify any patterns or outliers</em></h3>
+<pre class="python"><code># Histogram with KDE
+sns.histplot(data=iris, x=&#39;sepal_width&#39;, kde=True)
+plt.title(&#39;Histogram with KDE&#39;)
+plt.show()</code></pre>
+<p><img src="images/output_26_0.png" /></p>
+</div>
+<div id="compare-the-distribution-of-many-continuous-variables" class="section level3">
+<h3><em>Compare the distribution of many continuous variables</em></h3>
+<pre class="python"><code># Histogram with multiple features
+sns.histplot(data=iris[[&#39;sepal_length&#39;,&#39;sepal_width&#39;]])
+plt.title(&#39;Multi-Column Histogram&#39;)
+plt.show()</code></pre>
+<p><img src="images/output_28_1.png" /></p>
+</div>
+<div id="compare-the-distribution-of-a-continuous-variable-for-different-categories" class="section level3">
+<h3><em>Compare the distribution of a continuous variable for different categories</em></h3>
+<pre class="python"><code>sns.histplot(iris, x=&#39;sepal_length&#39;, hue=&#39;species&#39;, multiple=&#39;stack&#39;, linewidth=0.5)
+plt.title(&#39;Stacked Histogram&#39;)
+plt.show()</code></pre>
+<p><img src="images/output_30_1.png" /></p>
+</div>
+</div>
+<div id="cat-plots-box-violin-swarm-boxen" class="section level1">
+<h1>4. Cat Plots (Box, Violin, Swarm, Boxen)</h1>
+<p>Catplot is a flexible higher-level function that integrates various categorical seaborn plots including boxplots, violinplots, swarmplots, pointplots, barplots, and countplots.</p>
+<p>Now, let’s use tips dataset.</p>
+<div id="boxplot" class="section level3">
+<h3><em>Boxplot</em></h3>
+<pre class="python"><code># Boxplot
+sns.boxplot(data=tips, x=&#39;time&#39;, y=&#39;total_bill&#39;, hue=&#39;sex&#39;, palette=&#39;viridis&#39;)
+plt.title(&#39;Boxplot&#39;)
+plt.show()</code></pre>
+<p><img src="images/output_35_1.png" /></p>
+</div>
+<div id="violin-plot" class="section level3">
+<h3><em>Violin plot</em></h3>
+<pre class="python"><code># Violinplot
+sns.violinplot(data=tips, x=&#39;day&#39;, y=&#39;total_bill&#39;, palette=&#39;viridis&#39;)
+plt.title(&#39;Violinplot&#39;)
+plt.show()</code></pre>
+<p><img src="images/output_37_1.png" /></p>
+</div>
+<div id="swarm-plot" class="section level3">
+<h3><em>Swarm plot</em></h3>
+<pre class="python"><code>sns.swarmplot(data=tips, x=&#39;time&#39;, y=&#39;tip&#39;, dodge=True, palette=&#39;viridis&#39;, hue=&#39;sex&#39;, s=6)
+plt.title(&#39;SwarmPlot&#39;)
+plt.show()</code></pre>
+<p><img src="images/output_39_0.png" /></p>
+</div>
+<div id="stripplot" class="section level3">
+<h3><em>StripPlot</em></h3>
+<pre class="python"><code>#StripPlot
+sns.stripplot(data=tips, x=&#39;tip&#39;, hue=&#39;size&#39;, y=&#39;day&#39;, s=25, alpha=0.2, jitter=False, marker=&#39;D&#39;,palette=&#39;viridis&#39;)
+plt.title(&#39;StripPlot&#39;)
+plt.show()</code></pre>
+<p><img src="images/output_41_1.png" /></p>
+</div>
+</div>
+<div id="multiple-plots-using-facetgrid" class="section level1">
+<h1>5. Multiple Plots using FacetGrid</h1>
+<p>FacetGrid, a component of the seaborn library, enables the creation of multiple data subsets arranged in a grid format. Each plot within the grid represents a specific category, determined by the column names specified in the ‘col’ and ‘row’ attributes of FacetGrid().</p>
+<p>The plots within the grid can encompass various plot types supported by seaborn, including scatter plots, line plots, bar plots, and histograms.</p>
+<p>For example, we utilized exercise dataset.</p>
+<div id="boxplots-for-pulse-rate-during-different-activities" class="section level3">
+<h3><em>Boxplots for pulse rate during different activities</em></h3>
+<pre class="python"><code># Creating subplots using FacetGrid
+g = sns.FacetGrid(exercise, col=&#39;kind&#39;, palette=&#39;Paired&#39;)
+
+# Drawing a plot on every facet
+g.map(sns.boxplot, &#39;pulse&#39;)
+g.set_titles(col_template=&quot;Pulse rate for {col_name}&quot;)</code></pre>
+<p><img src="images/output_46_2.png" /></p>
+</div>
+<div id="scatter-plots-for-flipper-length-and-body-mass-of-penguins-from-different-islands" class="section level3">
+<h3><em>Scatter plots for flipper length and body mass of Penguins from different islands</em></h3>
+<p>For this plot, we utilized penguins dataset.</p>
+<pre class="python"><code># Creating subplots using FacetGrid
+g = sns.FacetGrid(penguins, col=&#39;island&#39;, hue=&#39;sex&#39;, palette=&#39;Paired&#39;)
+
+# Drawing a plot on every facet
+g.map(sns.scatterplot, &#39;flipper_length_mm&#39;, &#39;body_mass_g&#39;)
+g.set_titles(template=&quot;Penguins of {col_name} Island&quot;)
+g.add_legend()</code></pre>
+<p><img src="images/output_50_1.png" /></p>
+</div>
+</div>
+<div id="joint-plots" class="section level1">
+<h1>6. Joint Plots</h1>
+<p>A joint plot consolidates various univariate and bivariate plots within one figure. The focal point usually features a scatter plot or a hexbin plot, illustrating the joint distribution of the two variables.</p>
+<p>Alongside, additional plots along the axes, such as histograms or Kernel Density Estimations (KDEs), depict the individual distributions of each variable.</p>
+<p>Let’s use mpg dataset to see some examples.</p>
+<div id="comparison-of-the-displacement-and-mpg-for-cars" class="section level3">
+<h3><em>Comparison of the displacement and mpg for cars</em></h3>
+<pre class="python"><code># Hex Plot with Histogram margins
+sns.jointplot(x=&quot;mpg&quot;, y=&quot;displacement&quot;, data=mpg, height=5, kind=&#39;hex&#39;, ratio=2, marginal_ticks=True)</code></pre>
+<p><img src="images/output_54_1.png" /></p>
+</div>
+<div id="comparison-of-acceleration-and-horsepower-for-cars-from-different-countries" class="section level3">
+<h3><em>Comparison of acceleration and horsepower for cars from different countries</em></h3>
+<pre class="python"><code># Scatter Plot with KDE Margins
+sns.jointplot(x=&quot;horsepower&quot;, y=&quot;acceleration&quot;, data=mpg, hue=&quot;origin&quot;, height=5, ratio=2, marginal_ticks=True)</code></pre>
+<p><img src="images/output_56_2.png" /></p>
+</div>
+</div>
+<div id="kde-plots" class="section level1">
+<h1>7. KDE Plots</h1>
+<p>A KDE (Kernel Density Estimate) plot is a smoothed rendition of a histogram, showcasing the probability density function of a continuous random variable.</p>
+<p>The y-axis denotes the density or probability of observing a specific value of the variable, while the x-axis signifies the values of the variable itself.</p>
+<div id="comparing-the-horsepower-of-cars-with-respect-to-number-of-cylinders" class="section level3">
+<h3><em>Comparing the horsepower of cars with respect to number of cylinders</em></h3>
+<pre class="python"><code>#Overlapping KDE Plots
+sns.kdeplot(data=mpg, x=&#39;horsepower&#39;, hue=&#39;cylinders&#39;, fill=True,
+           palette=&#39;viridis&#39;, alpha=.5, linewidth=0)
+plt.title(&#39;Overlapping KDE Plot&#39;)
+plt.show()</code></pre>
+<p><img src="images/output_60_1.png" /></p>
+</div>
+</div>
+<div id="pairplots" class="section level1">
+<h1>8. Pairplots</h1>
+<p>A pair plot is a visualization technique that enables exploration of relationships between multiple variables within a dataset. It comprises a grid of scatter plots, where each variable is plotted against every other variable.</p>
+<p>Along the diagonal, histograms or density plots for each variable illustrate the distribution of values.</p>
+<pre class="python"><code>#Simple Pairplot
+sns.pairplot(data=penguins, corner=True)</code></pre>
+<p><img src="images/output_66_1.png" /></p>
+<pre class="python"><code># Pairplot with hues
+sns.pairplot(data=penguins, hue=&#39;species&#39;)</code></pre>
+<p><img src="images/output_67_2.png" /></p>
+</div>
+<div id="heatmaps" class="section level1">
+<h1>9. Heatmaps</h1>
+<p>Heatmaps serve as visual representations utilizing color-coded cells to exhibit the values within a matrix or data table.</p>
+<p>Within a heatmap, the rows and columns of the matrix represent distinct variables, while the intensity of each cell’s color depicts the magnitude or value of the data point at the intersection of those variables.</p>
+<pre class="python"><code>#Selection of numeric columns from the dataset
+num_cols = list(mpg.select_dtypes(include=&#39;number&#39;))
+fig = plt.figure(figsize=(12,7))
+
+#Correlation Heatmap
+sns.heatmap(data=mpg[num_cols].corr(),
+            annot=True, cmap=sns.cubehelix_palette(as_cmap=True))
+plt.title(&#39;Heatmap of Correlation matrix&#39;)
+plt.show()</code></pre>
+<p><img src="images/output_70_0.png" /></p>
+</div>
+<div id="scatter-plots" class="section level1">
+<h1>10. Scatter Plots</h1>
+<p>A scatterplot illustrates the correlation between two continuous variables by plotting individual data points on a graph, where one variable is depicted on the x-axis and the other on the y-axis.</p>
+<p>The resulting plot displays multiple points scattered across the graph, hence earning the name “scatterplot.”</p>
+<p>Scatter plots serve several purposes in data analysis and visualization:</p>
+<ul>
+<li><p>Visualizing Relationships: They help in understanding the relationship between two continuous variables. For example, they can reveal if there’s a positive, negative, or no correlation between the variables.</p></li>
+<li><p>Identifying Patterns: Scatter plots can help identify patterns or trends in data, such as clusters or outliers, which may not be apparent from summary statistics alone.</p></li>
+<li><p>Assessing Correlation: They allow for a quick assessment of the strength and direction of the relationship between variables. Strong correlations often result in a more structured or linear arrangement of points, while weak correlations may result in a more scattered arrangement.</p></li>
+<li><p>Checking for Linearity: Scatter plots are useful for assessing whether a linear model is appropriate for the data. If the points form a clear linear pattern, linear regression may be a suitable modeling technique.</p></li>
+<li><p>Visualizing Distribution: Scatter plots provide insights into the distribution of data points along both the x-axis and y-axis, which can help in understanding the overall shape of the data distribution.</p></li>
+</ul>
+<pre class="python"><code># Simple Scatterplot
+sns.scatterplot(data=mpg, x=&#39;weight&#39;, y=&#39;horsepower&#39;, s=150, alpha=0.7)
+plt.title(&#39;Simple Scatterplot&#39;)
+plt.show()</code></pre>
+<p><img src="images/output_73_0.png" /></p>
+<pre class="python"><code># Scatterplot with Hue
+sns.scatterplot(data=mpg, x=&#39;weight&#39;, y=&#39;horsepower&#39;, s=150, alpha=0.7,
+               hue=&#39;origin&#39;, palette=&#39;viridis&#39;)
+plt.title(&#39;Scatterplot with Hue&#39;)
+plt.show()</code></pre>
+<p><img src="images/output_74_0.png" /></p>
+<pre class="python"><code># Scatterplot with Hue and Markers
+sns.scatterplot(data=mpg, x=&#39;weight&#39;, y=&#39;horsepower&#39;, s=150, alpha=0.7,
+              style=&#39;origin&#39;,palette=&#39;viridis&#39;, hue=&#39;origin&#39;)
+plt.title(&#39;Scatterplot with Hue and Markers&#39;)
+plt.show()</code></pre>
+<p><img src="images/output_75_0.png" /></p>
+<pre class="python"><code># Scatterplot with Hue &amp; Size
+sns.scatterplot(data=mpg, x=&#39;weight&#39;, y=&#39;horsepower&#39;, sizes=(40, 400), alpha=.5,
+              palette=&#39;viridis&#39;, hue=&#39;origin&#39;, size=&#39;cylinders&#39;)
+plt.title(&#39;Scatterplot with Hue &amp; Size&#39;)
+plt.show()</code></pre>
+<p><img src="images/output_76_0.png" /></p>
+<div id="more-details-can-be-seen-in-the-links-below" class="section level2">
+<h2>More details can be seen in the links below:</h2>
+<ol style="list-style-type: decimal">
+<li><p><a href="https://seaborn.pydata.org/generated/seaborn.barplot.html">Bar Plots</a></p></li>
+<li><p><a href="https://seaborn.pydata.org/generated/seaborn.countplot.html">Count Plots</a></p></li>
+<li><p><a href="https://seaborn.pydata.org/generated/seaborn.histplot.html">Histograms</a></p></li>
+<li><p><a href="https://seaborn.pydata.org/generated/seaborn.catplot.html">Cat Plots (Box, Violin, Swarm, Boxen)</a></p></li>
+<li><p><a href="https://seaborn.pydata.org/generated/seaborn.FacetGrid.html">Multiple Plots using FacetGrid</a></p></li>
+<li><p><a href="https://seaborn.pydata.org/generated/seaborn.jointplot.html">Joint Plots</a></p></li>
+<li><p><a href="https://seaborn.pydata.org/generated/seaborn.kdeplot.html">KDE Plots</a></p></li>
+<li><p><a href="https://seaborn.pydata.org/generated/seaborn.pairplot.html">Pairplots</a></p></li>
+<li><p><a href="https://seaborn.pydata.org/generated/seaborn.heatmap.html">Heatmaps</a></p></li>
+</ol>
+<p>10.<a href="https://seaborn.pydata.org/generated/seaborn.scatterplot.html">Scatter Plots</a></p>
+<div id="references" class="section level3">
+<h3>References</h3>
+<p>-<a href="https://medium.com/@snehabajaj108/ten-must-know-seaborn-plots-1f3a82dc99c5">Ten Must-Know Seaborn Plots</a>;</p>
+<p>-<a href="https://seaborn.pydata.org/index.html">Seaborn: statistical data visualization</a>;</p>
+<p><img src="https://us.123rf.com/450wm/alesika/alesika2008/alesika200800157/153702004-see-you-soon-inscription-handwritten-lettering-illustration-black-vector-text-in-speech-bubble-simpl.jpg?ver=6" /></p>
+</div>
+</div>
+</div>
