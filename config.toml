@@ -90,6 +90,10 @@ enableEmoji = true
       icon_pack = "fab"
       url       = "https://github.com/saulosgil"
   [[params.social]]
+      icon      = "linkedin" # icon name without the 'fa-'
+      icon_pack = "fab"
+      url       = "https://www.linkedin.com/in/saulo-gil-b3a9061a0/"
+  [[params.social]]
       icon      = "twitter" # icon name without the 'fa-'
       icon_pack = "fab"
       url       = "https://twitter.com/saulo_gil"
