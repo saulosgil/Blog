@@ -267,7 +267,9 @@ Observing plots above, we can observe that elbow and silhouette methods indicate
 
 # Final
 
-In the conclusion, the K-means method with 2 cluster appear to offer an adequate clusterization of the heart disease dataset. Thus, this algorithm would may be utilized to determine specific medical care for each cluster of patients. It is noteworthy  that the analyses performed herein are not intended to be used in practice. However, these analysis reinforce the utilization of unsupervised machine learning in the health care scenario.
+In the conclusion, the K-means method with 2 cluster appear to offer an adequate clusterization of the heart disease dataset. Thus, this algorithm would may be utilized to determine specific medical care for each cluster of patients. 
+
+These analysis reinforce the utilization of unsupervised machine learning in the health care scenario.
 
 Hope you enjoyed it!`r emojifont::emoji("stuck_out_tongue_winking_eye")`!
 

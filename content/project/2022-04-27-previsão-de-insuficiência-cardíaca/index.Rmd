@@ -500,7 +500,7 @@ heart_test_preds |>
 # Conclusions
 In conclusion, Random Forest proved effective in predicting heart disease. Therefore, this artificial intelligence approach can be implemented in clinical settings to assist healthcare professionals in the early detection of heart disease.
 
-It is noteworthy  that the analyses performed herein are not intended to be used in practice. However, these analysis reinforce the utilization of ML algorithm in the health care.
+These analysis reinforce the utilization of ML algorithm in the health care.
 
 Hope you enjoyed it!`r emojifont::emoji("stuck_out_tongue_winking_eye")`!
 

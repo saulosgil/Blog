@@ -700,7 +700,7 @@ vip::vip(dispneia_xgb_vip)+
 # Conclusions
 Finally, XGBoost was effective to predict dyspnea in COVID-19 survivors 6-9 months after hospital discharge. Thus, XGBoost implementation in a clinical setting might aid health professionals in the early management of COVID-19 survivors at risk of future dyspnea.
 
-It is noteworthy  that the analyses performed herein are not intended to be used in practice. However, these analysis reinforce the utilization of ML algorithm in the health care.
+These analysis reinforce the utilization of ML algorithm in the health care.
 
 Hope you enjoyed it!`r emojifont::emoji("stuck_out_tongue_winking_eye")`!
 
