@@ -1,0 +1,156 @@
+---
+title: "Health Equity: Who Are Hospital Rooms And Beds For In Brazil?"
+subtitle: ""
+excerpt: ""
+date: '2024-02-16'
+author: Saulo Gil
+draft: false
+images:
+series:
+layout: single
+slug: []
+categories: []
+tags: []
+---
+
+
+
+<div id="health-equity-who-are-hospital-rooms-and-beds-for-in-brazil" class="section level1">
+<h1>Health Equity: Who Are Hospital Rooms And Beds For In Brazil?</h1>
+<!-- badges: start -->
+<!-- badges: end -->
+<p>Sustainable development refers to a global effort that involves development capable of meeting the needs of the current generation without compromising the ability to meet the needs of future generations. This concept is broad and aims at the environmental, economic, and social development of all societies. To achieve this, seventeen goals have been created in an attempt to guide sustainable development objectives. They are:</p>
+<ul>
+<li>1 - eradication of poverty;</li>
+<li>2 - zero hunger and sustainable agriculture;</li>
+<li>3 - health and well-being;</li>
+<li>4 - quality education;</li>
+<li><strong>5 - gender equality;</strong></li>
+<li>6 - clean water and sanitation;</li>
+<li>7 - affordable and clean energy;</li>
+<li>8 - decent work and economic growth;</li>
+<li>9 - industry, innovation, and infrastructure;</li>
+<li>10 - reduced inequalities;</li>
+<li>11 - sustainable cities and communities;</li>
+<li>12 - responsible consumption and production;</li>
+<li>13 - action against global climate change;</li>
+<li>14 - life below water;</li>
+<li>15 - life on land;</li>
+<li>16 - peace, justice, and strong institutions and;</li>
+<li>17 - partnerships and means of implementation.</li>
+</ul>
+<p>In particular, gender equality refers to ensuring that all individuals have the same opportunities, rights, and fair treatment, regardless of their gender (3). Similarly, health equity refers to the provision of equal service regardless of gender (4). Although its role is crucial for universal healthcare, gender equity in health remains a significant challenge for nations, including Brazil. It must be carefully monitored so that we can achieve the desired goal of universal coverage.</p>
+<p>In this scenario, the healthcare systems must provide equal assistance regardless of gender. Therefore,</p>
+<p>Therefore, this analysis had as its main purpose to describe the number of consultation rooms, examination rooms, and resting/observation beds in emergency care services for women, men, and undifferentiated individuals in the Brazilian public healthcare system.</p>
+<div id="how-to-do-it" class="section level2">
+<h2>How to do it?</h2>
+<p>The number of undifferentiated rooms, rest/observation rooms and the number of observation rest beds in emergency/urgency units and exclusively for men and women were obtained through the National Registry of Health Establishments (Cadastro Nacional de Estabelecimentos de Saúde - CNES).</p>
+<p>Briefly, CNES is an official information system for registering data from all healthcare establishments in Brazil, regardless of their legal nature or integration with the Unified Health System (SUS). It is the Ministry of Health’s official registry concerning the reality of installed capacity and healthcare workforce in Brazil within public or private healthcare establishments, whether affiliated with SUS or not.</p>
+<p>To acquire estimates of the total population of the Brazilian Federation Units, the Brazilian population database from the Brazilian Institute of Geography and Statistics (IBGE) was used. The number of beds per state was relativized by the size of the study population and is expressed as the number of rooms or beds per 100,000 habitants ([n/population]*100,000).</p>
+</div>
+<div id="so-lets-to-do-it" class="section level2">
+<h2>SO, LET’S TO DO IT</h2>
+</div>
+<div id="libraries-required" class="section level2">
+<h2>Libraries required</h2>
+<pre class="r"><code># libraries
+library(basedosdados)
+library(geobr)
+library(dplyr)
+library(ggplot2)
+library(patchwork)</code></pre>
+<pre class="r"><code># Acess project in the BD ---------------------------------------------------------------------
+basedosdados::set_billing_id(&quot;analise-dados-curso-bda&quot;)
+
+# Query - CNES and Population -------------------------------------------------------------------
+query &lt;-
+&quot;
+SELECT
+  a.ano,
+  a.sigla_uf,
+  b.populacao,
+  SUM(quantidade_leito_repouso_feminino_urgencia) AS total_leito_repouso_fem_urgencia,
+  SUM(quantidade_leito_repouso_masculino_urgencia) AS total_leito_repouso_masc_urgencia,
+  SUM(quantidade_leito_repouso_indiferenciado_urgencia) AS total_leito_repouso_ind_urgencia,
+  SUM(quantidade_consultorio_feminino_urgencia) AS total_consultorio_fem_urgencia,
+  SUM(quantidade_consultorio_masculino_urgencia) AS total_consultorio_masc_urgencia,
+  SUM(quantidade_consultorio_indiferenciado_urgencia) AS total_consultorio_ind_urgencia,
+  SUM(quantidade_sala_repouso_feminino_urgencia) AS total_sala_repouso_fem_urgencia,
+  SUM(quantidade_sala_repouso_masculino_urgencia) AS total_sala_repouso_masc_urgencia,
+  SUM(quantidade_sala_repouso_indiferenciado_urgencia) AS total_sala_repouso_ind_urgencia,
+  SUM(quantidade_sala_repouso_feminino_ambulatorial) AS total_sala_repouso_fem_ambulatorio,
+  SUM(quantidade_sala_repouso_masculino_ambulatorial) AS total_sala_repouso_masc_ambulatorio,
+  SUM(quantidade_sala_repouso_indiferenciado_ambulatorial) AS total_sala_repouso_ind_ambulatorio
+FROM
+  basedosdados.br_ms_cnes.estabelecimento a
+INNER JOIN
+    basedosdados.br_ibge_populacao.uf b
+  ON
+    a.sigla_uf = b.sigla_uf
+WHERE
+  a.ano = 2021 AND b.ano = 2021
+GROUP BY
+  ano,
+  a.sigla_uf,
+  b.populacao
+&quot;
+
+# reading the Query -------------------------------------------------------------------------------
+df &lt;-
+  basedosdados::read_sql(query)
+
+# Look the query -------------------------------------------------------------------------
+dplyr::glimpse(df)</code></pre>
+<pre><code>## Rows: 27
+## Columns: 15
+## $ ano                                 &lt;int64&gt; 2021, 2021, 2021, 2021, 2021, 20…
+## $ sigla_uf                            &lt;chr&gt; &quot;SP&quot;, &quot;RJ&quot;, &quot;ES&quot;, &quot;MG&quot;, &quot;BA&quot;, &quot;SE&quot;…
+## $ populacao                           &lt;int64&gt; 46649132, 17463349, 4108508, 214…
+## $ total_leito_repouso_fem_urgencia    &lt;int64&gt; 28200, 10753, 2463, 14461, 12952…
+## $ total_leito_repouso_masc_urgencia   &lt;int64&gt; 26395, 10334, 2601, 14012, 12615…
+## $ total_leito_repouso_ind_urgencia    &lt;int64&gt; 71181, 33100, 5754, 30370, 22221…
+## $ total_consultorio_fem_urgencia      &lt;int64&gt; 1991, 1380, 108, 1530, 1190, 242…
+## $ total_consultorio_masc_urgencia     &lt;int64&gt; 1387, 1063, 60, 1356, 865, 1502,…
+## $ total_consultorio_ind_urgencia      &lt;int64&gt; 25946, 9525, 1570, 12547, 8893, …
+## $ total_sala_repouso_fem_urgencia     &lt;int64&gt; 7296, 2243, 789, 4041, 3390, 382…
+## $ total_sala_repouso_masc_urgencia    &lt;int64&gt; 6653, 2010, 741, 3850, 3021, 322…
+## $ total_sala_repouso_ind_urgencia     &lt;int64&gt; 22136, 10699, 1911, 10350, 8551,…
+## $ total_sala_repouso_fem_ambulatorio  &lt;int64&gt; 7078, 1528, 646, 5512, 3034, 336…
+## $ total_sala_repouso_masc_ambulatorio &lt;int64&gt; 11304, 1499, 694, 7077, 2978, 35…
+## $ total_sala_repouso_ind_ambulatorio  &lt;int64&gt; 60100, 15144, 4771, 38040, 22349…</code></pre>
+<div id="yessssnow-we-have-a-dataset" class="section level4">
+<h4>YESSSS…Now we have a dataset!!!</h4>
+<p>Let’s save the dataset.</p>
+<pre class="r"><code>readr::write_rds(x = df, file = &quot;tabela&quot;)</code></pre>
+</div>
+<div id="lets-make-plots" class="section level3">
+<h3>LET’S MAKE PLOTS</h3>
+</div>
+</div>
+<div id="number-of-service-roomsoffices-in-urgencyemergency-units" class="section level2">
+<h2>Number of service rooms/offices in urgency/emergency units</h2>
+<p><img src="rooms-office.png" /></p>
+</div>
+<div id="number-of-restobservation-rooms-in-urgentemergency-units" class="section level2">
+<h2>Number of rest/observation rooms in urgent/emergency units</h2>
+<p><img src="rest-rooms.png" /></p>
+</div>
+<div id="number-of-restobservation-beds-in-urgentemergency-units" class="section level2">
+<h2>Number of rest/observation beds in urgent/emergency units</h2>
+<p><img src="beds.png" />
+## What do figures show us?</p>
+<p>In general, Brazil has 1.916, 2.091, and 7.451 rooms/offices, rest/observation rooms, and the number of rest/observation beds in emergency/urgency units per 100,000 inhabitants, respectively.</p>
+<p>Brazil presents 204 and 175 rooms/offices in emergency/urgency units exclusively for men and women per 100,000 inhabitants.</p>
+<p>Regarding rest rooms in emergency/urgency units, there are 385 and 427 units per 100,000 inhabitants exclusively for men and women.</p>
+<p>Finally, the number of rest/observation beds in emergency/urgency units exclusively for men and women is 1,636 and 1,738 per 100,000 inhabitants, respectively.</p>
+<p>In summary, these data indicate gender equity in the distribution of rooms/offices, rest/observation rooms and beds in emergency/urgency units, indicating Brazilian efforts toward Global Sustainable Development.</p>
+<div id="references" class="section level3">
+<h3>References</h3>
+<p>-<a href="https://pubmed.ncbi.nlm.nih.gov/31155273/">Gender norms and health: insights from global survey data</a>;</p>
+<p>-<a href="https://sdgs.un.org/publications/transforming-our-world-2030-agenda-sustainable-development-17981">Transforming our World: The 2030 Agenda for Sustainable Development</a>;</p>
+<p>-<a href="https://pubmed.ncbi.nlm.nih.gov/31155276/">Gender equality and gender norms: framing the opportunities for health</a></p>
+<p>-<a href="https://www.paho.org/en/topics/gender-equality-health">Gender Equality in Health</a></p>
+<p><img src="https://us.123rf.com/450wm/alesika/alesika2008/alesika200800157/153702004-see-you-soon-inscription-handwritten-lettering-illustration-black-vector-text-in-speech-bubble-simpl.jpg?ver=6" /></p>
+</div>
+</div>
+</div>
