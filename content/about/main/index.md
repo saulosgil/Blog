@@ -6,10 +6,12 @@ use_featured: false # if false, use most recent by date
 number_categories: 3 # set to zero to exclude
 show_intro: true
 intro: |
-  My current research interest is to investigate the skeletal muscle role in general health status. Therefore, I'm leading some research projects to determine the pivotal role of skeletal muscle in clinical outcomes such as hospital length of stay and the effects of exercise training on muscle mass and function in clinical populations and the mechanisms that control skeletal muscle plasticity.
   
-  Additionally, I'm focused on developing my data science skills related to modeling statistics applied to health science. Thus, I have directed my studies to learn skills related to supervised and unsupervised machine learning using R language and Python.
+  I'm focused on my data scientist career and, thus I'm working to improve my hard skills related to machine learning, especially deep learning.
   
+  Also, I'm a researcher in the Applied Physiology & Nutrition Research Group from the University of Sao Paulo - Sao Paulo / Brazil in which I have investigated the skeletal muscle role in general health status and interventions to counteract muscle atrophy in catabolic conditions (e.g., bed-rest, obesity, so on).
+
+
 show_outro: false
 outro: |
   <i class="fas fa-glass-cheers pr2"></i>Sincere thanks to [Maëlle Salmon](https://masalmon.eu/) for her help naming this Hugo theme!
