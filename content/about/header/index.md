@@ -7,12 +7,15 @@ headline: |
 ---
 
 <!-- this is a subheadline -->
- - My name is `Saulo Gil`;
+ - 🤓 My name is `Saulo Gil`;
  
- - I'm a `Phd` in Science from the `University of São Paulo`;
+ - 👨‍🔬 I'm a `Phd` in Science from the `University of São Paulo`;
  
- - I'm currently a `researcher` at `HCFMUSP` investigating interventions to counteract muscle atrophy in catabolic conditions (e.g., aging, obesity and bedrest);
+ - 👨‍💻 I have graduated in `Systems Analysis and Development` and `Physical Education`;
  
- - I'm an `associate professor` at Physical Education Department and Master's Degree course in Health Science at Universidade Santo Amaro (UNISA);
+ - 👨‍🔬 I'm currently a `researcher` at `HCFMUSP`;
  
- - I'm an undergraduate student in `Systems Analysis and Development` (UNISA); 
+ - 👨‍🏫 I'm an `associate professor` at Physical Education Department and Master's Degree course in Health Science at Universidade Santo Amaro (UNISA);
+ 
+ - 👨‍💻📖 I love data science and I'm focused on learning everything related to Machine learning; 
+ 
