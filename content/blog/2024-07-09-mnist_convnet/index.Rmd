@@ -86,17 +86,12 @@ y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 ```
 
-```
-# output
-x_train shape: (60000, 28, 28, 1)
-60000 train samples
-10000 test samples
-```
-
 ## 🧐 Looking handwritten digits images
 
 ```{python echo=TRUE}
+plt.figure()
 plt.imshow(x_train[0], cmap=plt.cm.binary)
+plt.show()
 ```
 
 Le'ts see 10 imagens and its labels.
@@ -260,7 +255,7 @@ As we can see, the highest probability is at index 1 (i.e., 9.99), indicating th
 
 ## Let's see the image❗
 
-```{python}
+```{python echo=TRUE}
 plt.figure()
 plt.imshow(x_test[2], cmap=plt.cm.binary)
 plt.show()

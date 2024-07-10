@@ -1,12 +1,12 @@
 ---
-title: "Deep Learning - A simple CNN to predict Handwritten Digits"
-subtitle: ""
-excerpt: ""
-date: '2024-07-10'
-author: Saulo Gil
+title: "Deep Learning - A simple CNN to predict Handwritten Digits - MNIST dataset"
+author: "Saulo Gil"
+date: "2024-07-10"
+excerpt: ''
+subtitle: ''
 draft: false
-images:
-series:
+images: null
+series: null
 layout: single
 slug: []
 categories: []
@@ -87,13 +87,11 @@ print(&quot;x_train shape:&quot;, x_train.shape)</code></pre>
 # converter vetores de classe em matrizes de classe binárias
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)</code></pre>
-<pre><code># output
-x_train shape: (60000, 28, 28, 1)
-60000 train samples
-10000 test samples</code></pre>
 <div id="looking-handwritten-digits-images" class="section level2">
 <h2>🧐 Looking handwritten digits images</h2>
-<pre class="python"><code>plt.imshow(x_train[0], cmap=plt.cm.binary)</code></pre>
+<pre class="python"><code>plt.figure()
+plt.imshow(x_train[0], cmap=plt.cm.binary)
+plt.show()</code></pre>
 <p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>Le’ts see 10 imagens and its labels.</p>
 <pre class="python"><code># Visualizar 10 imagens e seus rótulos
@@ -168,38 +166,6 @@ model.compile(loss=&#39;categorical_crossentropy&#39;,
 </div>
 <div id="training-the-model" class="section level2">
 <h2>🖥️🪫 Training the model</h2>
-<pre class="python"><code>model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size, callbacks=[callbacks], validation_split=0.1, verbose=2)</code></pre>
-<pre><code>## Epoch 1/15
-## 422/422 - 6s - 14ms/step - accuracy: 0.8875 - loss: 0.3670 - val_accuracy: 0.9753 - val_loss: 0.0906
-## Epoch 2/15
-## 422/422 - 5s - 11ms/step - accuracy: 0.9626 - loss: 0.1194 - val_accuracy: 0.9830 - val_loss: 0.0626
-## Epoch 3/15
-## 422/422 - 5s - 11ms/step - accuracy: 0.9726 - loss: 0.0886 - val_accuracy: 0.9873 - val_loss: 0.0489
-## Epoch 4/15
-## 422/422 - 5s - 12ms/step - accuracy: 0.9779 - loss: 0.0732 - val_accuracy: 0.9892 - val_loss: 0.0418
-## Epoch 5/15
-## 422/422 - 5s - 12ms/step - accuracy: 0.9796 - loss: 0.0664 - val_accuracy: 0.9890 - val_loss: 0.0433
-## Epoch 6/15
-## 422/422 - 5s - 12ms/step - accuracy: 0.9816 - loss: 0.0591 - val_accuracy: 0.9892 - val_loss: 0.0375
-## Epoch 7/15
-## 422/422 - 5s - 12ms/step - accuracy: 0.9829 - loss: 0.0550 - val_accuracy: 0.9908 - val_loss: 0.0338
-## Epoch 8/15
-## 422/422 - 5s - 12ms/step - accuracy: 0.9848 - loss: 0.0493 - val_accuracy: 0.9922 - val_loss: 0.0329
-## Epoch 9/15
-## 422/422 - 5s - 12ms/step - accuracy: 0.9847 - loss: 0.0478 - val_accuracy: 0.9913 - val_loss: 0.0298
-## Epoch 10/15
-## 422/422 - 5s - 12ms/step - accuracy: 0.9861 - loss: 0.0436 - val_accuracy: 0.9917 - val_loss: 0.0326
-## Epoch 11/15
-## 422/422 - 5s - 12ms/step - accuracy: 0.9876 - loss: 0.0401 - val_accuracy: 0.9913 - val_loss: 0.0303
-## Epoch 12/15
-## 422/422 - 5s - 12ms/step - accuracy: 0.9880 - loss: 0.0391 - val_accuracy: 0.9923 - val_loss: 0.0284
-## Epoch 13/15
-## 422/422 - 5s - 12ms/step - accuracy: 0.9880 - loss: 0.0371 - val_accuracy: 0.9900 - val_loss: 0.0326
-## Epoch 14/15
-## 422/422 - 6s - 13ms/step - accuracy: 0.9887 - loss: 0.0362 - val_accuracy: 0.9920 - val_loss: 0.0286
-## Epoch 15/15
-## 422/422 - 5s - 13ms/step - accuracy: 0.9885 - loss: 0.0351 - val_accuracy: 0.9918 - val_loss: 0.0302
-## &lt;keras.src.callbacks.history.History object at 0x000001AC8DC8E960&gt;</code></pre>
 <p>Epoch 1/15
 422/422 - 6s - 14ms/step - accuracy: 0.8906 - loss: 0.3653 - val_accuracy: 0.9763 - val_loss: 0.0905
 Epoch 2/15
@@ -235,7 +201,7 @@ Epoch 15/15
 <h2>🎯 Evaluate the trained model</h2>
 <pre class="python"><code>score = model.evaluate(x_test, y_test, verbose=0)
 print(&quot;Test loss:&quot;, round(score[0], 2))</code></pre>
-<pre><code>## Test loss: 0.03</code></pre>
+<pre><code>## Test loss: 0.02</code></pre>
 <pre class="python"><code>print(&quot;Test accuracy:&quot;, round(score[1], 2))</code></pre>
 <pre><code>## Test accuracy: 0.99</code></pre>
 </div>
@@ -243,24 +209,23 @@ print(&quot;Test loss:&quot;, round(score[0], 2))</code></pre>
 <h2>🧐 Looking the predictions</h2>
 <pre class="python"><code>predictions = model.predict(x_test)</code></pre>
 <pre><code>## 
-## [1m  1/313[0m [37m━━━━━━━━━━━━━━━━━━━━[0m [1m13s[0m 45ms/step
-## [1m 33/313[0m [32m━━[0m[37m━━━━━━━━━━━━━━━━━━[0m [1m0s[0m 2ms/step  
-## [1m 67/313[0m [32m━━━━[0m[37m━━━━━━━━━━━━━━━━[0m [1m0s[0m 2ms/step
-## [1m103/313[0m [32m━━━━━━[0m[37m━━━━━━━━━━━━━━[0m [1m0s[0m 2ms/step
-## [1m138/313[0m [32m━━━━━━━━[0m[37m━━━━━━━━━━━━[0m [1m0s[0m 1ms/step
+## [1m  1/313[0m [37m━━━━━━━━━━━━━━━━━━━━[0m [1m14s[0m 47ms/step
+## [1m 32/313[0m [32m━━[0m[37m━━━━━━━━━━━━━━━━━━[0m [1m0s[0m 2ms/step  
+## [1m 66/313[0m [32m━━━━[0m[37m━━━━━━━━━━━━━━━━[0m [1m0s[0m 2ms/step
+## [1m101/313[0m [32m━━━━━━[0m[37m━━━━━━━━━━━━━━[0m [1m0s[0m 2ms/step
+## [1m137/313[0m [32m━━━━━━━━[0m[37m━━━━━━━━━━━━[0m [1m0s[0m 1ms/step
 ## [1m172/313[0m [32m━━━━━━━━━━[0m[37m━━━━━━━━━━[0m [1m0s[0m 1ms/step
-## [1m207/313[0m [32m━━━━━━━━━━━━━[0m[37m━━━━━━━[0m [1m0s[0m 1ms/step
-## [1m230/313[0m [32m━━━━━━━━━━━━━━[0m[37m━━━━━━[0m [1m0s[0m 2ms/step
-## [1m257/313[0m [32m━━━━━━━━━━━━━━━━[0m[37m━━━━[0m [1m0s[0m 2ms/step
-## [1m293/313[0m [32m━━━━━━━━━━━━━━━━━━[0m[37m━━[0m [1m0s[0m 2ms/step
+## [1m208/313[0m [32m━━━━━━━━━━━━━[0m[37m━━━━━━━[0m [1m0s[0m 1ms/step
+## [1m244/313[0m [32m━━━━━━━━━━━━━━━[0m[37m━━━━━[0m [1m0s[0m 1ms/step
+## [1m278/313[0m [32m━━━━━━━━━━━━━━━━━[0m[37m━━━[0m [1m0s[0m 1ms/step
 ## [1m313/313[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 2ms/step
 ## [1m313/313[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m1s[0m 2ms/step</code></pre>
 <div id="example---index-2" class="section level3">
 <h3>Example - index 2</h3>
 <pre class="python"><code>np.array(predictions[2])</code></pre>
-<pre><code>## array([2.2880795e-07, 9.9983358e-01, 5.5918867e-06, 6.2548075e-08,
-##        1.2689891e-04, 1.3862756e-07, 1.7468795e-06, 2.1885729e-05,
-##        9.4010393e-06, 4.4606324e-07], dtype=float32)</code></pre>
+<pre><code>## array([1.4560229e-07, 9.9981290e-01, 1.7064168e-06, 3.7038593e-08,
+##        9.2095484e-05, 2.2477290e-07, 1.4061417e-06, 7.6603275e-05,
+##        1.4733056e-05, 1.4462152e-07], dtype=float32)</code></pre>
 <pre class="python"><code>np.argmax(predictions[2])</code></pre>
 <pre><code>## 1</code></pre>
 <p>As we can see, the highest probability is at index 1 (i.e., 9.99), indicating the value 1.</p>
@@ -297,6 +262,7 @@ plt.show()</code></pre>
 <ol style="list-style-type: decimal">
 <li><a href="http://yann.lecun.com/exdb/mnist/">The MNIST database of handwritten digits</a></li>
 <li><a href="https://colab.research.google.com/github/keras-team/keras-io/blob/master/examples/vision/ipynb/mnist_convnet.ipynb#scrollTo=xo9HwpE5gmQB">Chollet, F. A simple convnet that achieves ~99% test accuracy on MNIST.</a></li>
+<li><a href="https://github.com/saulosgil/mnist_convnet">Jupyter notebook with codes</a></li>
 </ol>
 </div>
 </div>
