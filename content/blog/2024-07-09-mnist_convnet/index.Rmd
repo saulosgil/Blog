@@ -198,7 +198,7 @@ model.compile(loss='categorical_crossentropy',
 ```
 
 ## 🖥️🪫 Training the model
-```{python echo=TRUE}
+```{python include=FALSE}
 model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size, callbacks=[callbacks], validation_split=0.1, verbose=2)
 ```
 Epoch 1/15
@@ -293,3 +293,4 @@ Hope you enjoyed it!
 
 1. [The MNIST database of handwritten digits](http://yann.lecun.com/exdb/mnist/)
 2. [Chollet, F. A simple convnet that achieves ~99% test accuracy on MNIST.](https://colab.research.google.com/github/keras-team/keras-io/blob/master/examples/vision/ipynb/mnist_convnet.ipynb#scrollTo=xo9HwpE5gmQB)
+3. [Jupyter notebook with codes](https://github.com/saulosgil/mnist_convnet)
