@@ -1,12 +1,12 @@
 ---
 title: "Deep Learning - A simple CNN to predict Handwritten Digits - MNIST dataset"
-subtitle: ""
-excerpt: ""
-date: '2024-07-10'
-author: Saulo Gil
+author: "Saulo Gil"
+date: "2024-07-10"
+excerpt: ''
+subtitle: ''
 draft: false
-images:
-series:
+images: null
+series: null
 layout: single
 slug: []
 categories: []
