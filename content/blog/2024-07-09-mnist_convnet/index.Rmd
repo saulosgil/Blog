@@ -63,25 +63,25 @@ import tensorflow as tf
 # 💻 Preparing the data
 
 ```{python echo=TRUE}
-# Modelo / paramêtros dos dados
+# Model / data parameters
 num_classes = 10
 input_shape = (28, 28, 1)
 
-# Downlaod dos dados e divição em conjuntos de treinamento e teste
+# Load the data and split it between train and test sets
 (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
 
-# Dimensione imagens para o intervalo [0, 1]
+# Scale images to the 0 and 1
 x_train = x_train.astype("float32") / 255
 x_test = x_test.astype("float32") / 255
 
-# Certifique-se de que as imagens tenham formato (28, 28, 1)
+# Make sure images have shape (28, 28, 1)
 x_train = np.expand_dims(x_train, -1)
 x_test = np.expand_dims(x_test, -1)
 print("x_train shape:", x_train.shape)
 print(x_train.shape[0], "train samples")
 print(x_test.shape[0], "test samples")
 
-# converter vetores de classe em matrizes de classe binárias
+# convert class vectors to binary class matrices
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 ```
@@ -97,7 +97,7 @@ plt.show()
 Le'ts see 10 imagens and its labels.
 
 ```{python echo=TRUE}
-# Visualizar 10 imagens e seus rótulos
+# Ten images and labels
 plt.figure(figsize=(15,10))
 for i in range(25):
   plt.subplot(5,5,i+1)
@@ -114,7 +114,7 @@ The CNN architecture used was developmented by François Chollet.
 
 This CNN achieved ~99% test accuracy.
 
-The code is available in the [Google Colab](https://colab.research.google.com/github/keras-team/keras-io/blob/master/examples/vision/ipynb/mnist_convnet.ipynb#scrollTo=xo9HwpE5gmQB).
+The original code is available in the [Google Colab](https://colab.research.google.com/github/keras-team/keras-io/blob/master/examples/vision/ipynb/mnist_convnet.ipynb#scrollTo=xo9HwpE5gmQB).
 
 
 ### 🤔 Who is François Chollet?
@@ -176,56 +176,27 @@ model.summary()
 batch_size = 128
 epochs = 15
 
-# Callback para interromper o treinamento se a acurácia atingir 90%
+# Callback to interrupt the training when accuracy achieves 99% (implemented just for testing!)
 class myCallback(tf.keras.callbacks.Callback):
   def on_epoch_end(self, epoch, logs={}):
     if(logs.get('accuracy')>0.99):
-      print("\nReached 90% accuracy so cancelling training!")
+      print("\nReached 99% accuracy so cancelling training!")
       self.model.stop_training = True
 
 callbacks = myCallback()
 
 
-# Adicionar paramêtros (loss function, otimizador e métrica de avaliação)
+# Model compile with loss function, optimizer e metrics
 model.compile(loss='categorical_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
 ```
 
 ## 🖥️🪫 Training the model
-```{python include=FALSE}
+```{python echo=TRUE}
 model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size, callbacks=[callbacks], validation_split=0.1, verbose=2)
 ```
-Epoch 1/15
-422/422 - 6s - 14ms/step - accuracy: 0.8906 - loss: 0.3653 - val_accuracy: 0.9763 - val_loss: 0.0905
-Epoch 2/15
-422/422 - 5s - 12ms/step - accuracy: 0.9649 - loss: 0.1135 - val_accuracy: 0.9848 - val_loss: 0.0635
-Epoch 3/15
-422/422 - 5s - 13ms/step - accuracy: 0.9749 - loss: 0.0832 - val_accuracy: 0.9868 - val_loss: 0.0493
-Epoch 4/15
-422/422 - 5s - 12ms/step - accuracy: 0.9786 - loss: 0.0695 - val_accuracy: 0.9883 - val_loss: 0.0430
-Epoch 5/15
-422/422 - 5s - 12ms/step - accuracy: 0.9808 - loss: 0.0619 - val_accuracy: 0.9877 - val_loss: 0.0431
-Epoch 6/15
-422/422 - 5s - 13ms/step - accuracy: 0.9825 - loss: 0.0548 - val_accuracy: 0.9902 - val_loss: 0.0368
-Epoch 7/15
-422/422 - 6s - 13ms/step - accuracy: 0.9840 - loss: 0.0509 - val_accuracy: 0.9908 - val_loss: 0.0339
-Epoch 8/15
-422/422 - 6s - 13ms/step - accuracy: 0.9853 - loss: 0.0464 - val_accuracy: 0.9917 - val_loss: 0.0319
-Epoch 9/15
-422/422 - 6s - 14ms/step - accuracy: 0.9858 - loss: 0.0444 - val_accuracy: 0.9913 - val_loss: 0.0324
-Epoch 10/15
-422/422 - 6s - 13ms/step - accuracy: 0.9870 - loss: 0.0410 - val_accuracy: 0.9918 - val_loss: 0.0295
-Epoch 11/15
-422/422 - 5s - 13ms/step - accuracy: 0.9876 - loss: 0.0392 - val_accuracy: 0.9917 - val_loss: 0.0324
-Epoch 12/15
-422/422 - 5s - 13ms/step - accuracy: 0.9881 - loss: 0.0377 - val_accuracy: 0.9918 - val_loss: 0.0321
-Epoch 13/15
-422/422 - 6s - 14ms/step - accuracy: 0.9892 - loss: 0.0334 - val_accuracy: 0.9915 - val_loss: 0.0310
-Epoch 14/15
-422/422 - 6s - 14ms/step - accuracy: 0.9888 - loss: 0.0349 - val_accuracy: 0.9915 - val_loss: 0.0296
-Epoch 15/15
-422/422 - 6s - 13ms/step - accuracy: 0.9894 - loss: 0.0334 - val_accuracy: 0.9925 - val_loss: 0.0280
+
 
 ## 🎯 Evaluate the trained model
 ```{python echo=TRUE}
@@ -288,4 +259,4 @@ Hope you enjoyed it!
 
 1. [The MNIST database of handwritten digits](http://yann.lecun.com/exdb/mnist/)
 2. [Chollet, F. A simple convnet that achieves ~99% test accuracy on MNIST.](https://colab.research.google.com/github/keras-team/keras-io/blob/master/examples/vision/ipynb/mnist_convnet.ipynb#scrollTo=xo9HwpE5gmQB)
-3. [Jupyter notebook with codes](https://github.com/saulosgil/mnist_convnet)
+3. [My Jupyter Notebook with Complete Code](https://github.com/saulosgil/mnist_convnet)
