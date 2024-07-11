@@ -1,16 +1,15 @@
 ---
-title: "Deep Learning - A simple CNN to predict Handwritten Digits - MNIST dataset"
-author: "Saulo Gil"
-date: "2024-07-10"
-excerpt: ''
-subtitle: ''
-draft: false
-images: null
-series: null
-layout: single
-slug: []
+author: Saulo Gil
 categories: []
-tags: []
+date: "2024-07-11"
+draft: false
+excerpt: This project consists of implementing a Deep Learning algorithm to detect handwritten digits. 
+featured: true
+layout: single-sidebar
+subtitle: ""
+tags:
+- hugo-site
+title: Deep Learning - A simple CNN to predict Handwritten Digits
 ---
 <!-- badges: start -->
 <!-- badges: end -->

@@ -1,16 +1,15 @@
 ---
-title: "Deep Learning - A simple CNN to predict Handwritten Digits - MNIST dataset"
-author: "Saulo Gil"
-date: "2024-07-10"
-excerpt: ''
-subtitle: ''
-draft: false
-images: null
-series: null
-layout: single
-slug: []
+author: Saulo Gil
 categories: []
-tags: []
+date: "2024-07-11"
+draft: false
+excerpt: This project consists of implementing a Deep Learning algorithm to detect handwritten digits. 
+featured: true
+layout: single-sidebar
+subtitle: "This project consists of implementing a Deep Learning algorithm to detect handwritten digits"
+tags:
+- hugo-site
+title: Deep Learning - A simple CNN to predict Handwritten Digits
 ---
 
 
@@ -168,42 +167,42 @@ model.compile(loss=&#39;categorical_crossentropy&#39;,
 <h2>🖥️🪫 Training the model</h2>
 <pre class="python"><code>model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size, callbacks=[callbacks], validation_split=0.1, verbose=2)</code></pre>
 <pre><code>## Epoch 1/15
-## 422/422 - 6s - 14ms/step - accuracy: 0.8809 - loss: 0.3828 - val_accuracy: 0.9770 - val_loss: 0.0876
+## 422/422 - 6s - 14ms/step - accuracy: 0.8855 - loss: 0.3728 - val_accuracy: 0.9765 - val_loss: 0.0843
 ## Epoch 2/15
-## 422/422 - 5s - 11ms/step - accuracy: 0.9644 - loss: 0.1178 - val_accuracy: 0.9802 - val_loss: 0.0678
+## 422/422 - 5s - 12ms/step - accuracy: 0.9653 - loss: 0.1134 - val_accuracy: 0.9850 - val_loss: 0.0561
 ## Epoch 3/15
-## 422/422 - 5s - 12ms/step - accuracy: 0.9730 - loss: 0.0892 - val_accuracy: 0.9857 - val_loss: 0.0520
+## 422/422 - 5s - 12ms/step - accuracy: 0.9737 - loss: 0.0843 - val_accuracy: 0.9867 - val_loss: 0.0469
 ## Epoch 4/15
-## 422/422 - 5s - 13ms/step - accuracy: 0.9770 - loss: 0.0737 - val_accuracy: 0.9868 - val_loss: 0.0460
+## 422/422 - 5s - 12ms/step - accuracy: 0.9779 - loss: 0.0700 - val_accuracy: 0.9877 - val_loss: 0.0423
 ## Epoch 5/15
-## 422/422 - 6s - 14ms/step - accuracy: 0.9799 - loss: 0.0644 - val_accuracy: 0.9897 - val_loss: 0.0383
+## 422/422 - 5s - 12ms/step - accuracy: 0.9804 - loss: 0.0624 - val_accuracy: 0.9910 - val_loss: 0.0365
 ## Epoch 6/15
-## 422/422 - 6s - 14ms/step - accuracy: 0.9819 - loss: 0.0585 - val_accuracy: 0.9910 - val_loss: 0.0371
+## 422/422 - 5s - 12ms/step - accuracy: 0.9820 - loss: 0.0579 - val_accuracy: 0.9895 - val_loss: 0.0382
 ## Epoch 7/15
-## 422/422 - 5s - 13ms/step - accuracy: 0.9834 - loss: 0.0527 - val_accuracy: 0.9910 - val_loss: 0.0369
+## 422/422 - 5s - 13ms/step - accuracy: 0.9839 - loss: 0.0508 - val_accuracy: 0.9905 - val_loss: 0.0346
 ## Epoch 8/15
-## 422/422 - 5s - 12ms/step - accuracy: 0.9849 - loss: 0.0480 - val_accuracy: 0.9908 - val_loss: 0.0350
+## 422/422 - 5s - 13ms/step - accuracy: 0.9851 - loss: 0.0477 - val_accuracy: 0.9925 - val_loss: 0.0325
 ## Epoch 9/15
-## 422/422 - 6s - 15ms/step - accuracy: 0.9857 - loss: 0.0454 - val_accuracy: 0.9902 - val_loss: 0.0332
+## 422/422 - 5s - 12ms/step - accuracy: 0.9857 - loss: 0.0454 - val_accuracy: 0.9920 - val_loss: 0.0315
 ## Epoch 10/15
-## 422/422 - 7s - 16ms/step - accuracy: 0.9869 - loss: 0.0420 - val_accuracy: 0.9913 - val_loss: 0.0311
+## 422/422 - 5s - 12ms/step - accuracy: 0.9868 - loss: 0.0412 - val_accuracy: 0.9912 - val_loss: 0.0315
 ## Epoch 11/15
-## 422/422 - 6s - 14ms/step - accuracy: 0.9868 - loss: 0.0413 - val_accuracy: 0.9913 - val_loss: 0.0318
+## 422/422 - 5s - 13ms/step - accuracy: 0.9874 - loss: 0.0398 - val_accuracy: 0.9913 - val_loss: 0.0309
 ## Epoch 12/15
-## 422/422 - 6s - 13ms/step - accuracy: 0.9878 - loss: 0.0374 - val_accuracy: 0.9912 - val_loss: 0.0316
+## 422/422 - 5s - 12ms/step - accuracy: 0.9878 - loss: 0.0378 - val_accuracy: 0.9912 - val_loss: 0.0296
 ## Epoch 13/15
-## 422/422 - 5s - 12ms/step - accuracy: 0.9889 - loss: 0.0371 - val_accuracy: 0.9915 - val_loss: 0.0296
+## 422/422 - 5s - 13ms/step - accuracy: 0.9886 - loss: 0.0348 - val_accuracy: 0.9927 - val_loss: 0.0300
 ## Epoch 14/15
-## 422/422 - 5s - 13ms/step - accuracy: 0.9889 - loss: 0.0350 - val_accuracy: 0.9918 - val_loss: 0.0326
+## 422/422 - 5s - 12ms/step - accuracy: 0.9879 - loss: 0.0360 - val_accuracy: 0.9930 - val_loss: 0.0280
 ## Epoch 15/15
-## 422/422 - 6s - 14ms/step - accuracy: 0.9892 - loss: 0.0342 - val_accuracy: 0.9918 - val_loss: 0.0293
-## &lt;keras.src.callbacks.history.History object at 0x0000023D34423860&gt;</code></pre>
+## 422/422 - 5s - 13ms/step - accuracy: 0.9894 - loss: 0.0326 - val_accuracy: 0.9930 - val_loss: 0.0259
+## &lt;keras.src.callbacks.history.History object at 0x0000027131BC2510&gt;</code></pre>
 </div>
 <div id="evaluate-the-trained-model" class="section level2">
 <h2>🎯 Evaluate the trained model</h2>
 <pre class="python"><code>score = model.evaluate(x_test, y_test, verbose=0)
 print(&quot;Test loss:&quot;, round(score[0], 2))</code></pre>
-<pre><code>## Test loss: 0.03</code></pre>
+<pre><code>## Test loss: 0.02</code></pre>
 <pre class="python"><code>print(&quot;Test accuracy:&quot;, round(score[1], 2))</code></pre>
 <pre><code>## Test accuracy: 0.99</code></pre>
 </div>
@@ -211,24 +210,23 @@ print(&quot;Test loss:&quot;, round(score[0], 2))</code></pre>
 <h2>🧐 Looking the predictions</h2>
 <pre class="python"><code>predictions = model.predict(x_test)</code></pre>
 <pre><code>## 
-## [1m  1/313[0m [37m━━━━━━━━━━━━━━━━━━━━[0m [1m15s[0m 49ms/step
-## [1m 21/313[0m [32m━[0m[37m━━━━━━━━━━━━━━━━━━━[0m [1m0s[0m 3ms/step  
-## [1m 39/313[0m [32m━━[0m[37m━━━━━━━━━━━━━━━━━━[0m [1m0s[0m 3ms/step
-## [1m 75/313[0m [32m━━━━[0m[37m━━━━━━━━━━━━━━━━[0m [1m0s[0m 2ms/step
-## [1m116/313[0m [32m━━━━━━━[0m[37m━━━━━━━━━━━━━[0m [1m0s[0m 2ms/step
-## [1m152/313[0m [32m━━━━━━━━━[0m[37m━━━━━━━━━━━[0m [1m0s[0m 2ms/step
-## [1m183/313[0m [32m━━━━━━━━━━━[0m[37m━━━━━━━━━[0m [1m0s[0m 2ms/step
-## [1m212/313[0m [32m━━━━━━━━━━━━━[0m[37m━━━━━━━[0m [1m0s[0m 2ms/step
-## [1m248/313[0m [32m━━━━━━━━━━━━━━━[0m[37m━━━━━[0m [1m0s[0m 2ms/step
-## [1m285/313[0m [32m━━━━━━━━━━━━━━━━━━[0m[37m━━[0m [1m0s[0m 2ms/step
+## [1m  1/313[0m [37m━━━━━━━━━━━━━━━━━━━━[0m [1m14s[0m 46ms/step
+## [1m 32/313[0m [32m━━[0m[37m━━━━━━━━━━━━━━━━━━[0m [1m0s[0m 2ms/step  
+## [1m 63/313[0m [32m━━━━[0m[37m━━━━━━━━━━━━━━━━[0m [1m0s[0m 2ms/step
+## [1m 90/313[0m [32m━━━━━[0m[37m━━━━━━━━━━━━━━━[0m [1m0s[0m 2ms/step
+## [1m127/313[0m [32m━━━━━━━━[0m[37m━━━━━━━━━━━━[0m [1m0s[0m 2ms/step
+## [1m165/313[0m [32m━━━━━━━━━━[0m[37m━━━━━━━━━━[0m [1m0s[0m 2ms/step
+## [1m205/313[0m [32m━━━━━━━━━━━━━[0m[37m━━━━━━━[0m [1m0s[0m 1ms/step
+## [1m244/313[0m [32m━━━━━━━━━━━━━━━[0m[37m━━━━━[0m [1m0s[0m 1ms/step
+## [1m283/313[0m [32m━━━━━━━━━━━━━━━━━━[0m[37m━━[0m [1m0s[0m 1ms/step
 ## [1m313/313[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 2ms/step
 ## [1m313/313[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m1s[0m 2ms/step</code></pre>
 <div id="example---index-2" class="section level3">
 <h3>Example - index 2</h3>
 <pre class="python"><code>np.array(predictions[2])</code></pre>
-<pre><code>## array([2.1943085e-06, 9.9925309e-01, 1.6262649e-05, 3.9057147e-07,
-##        5.0057319e-04, 6.9738951e-07, 8.6912733e-06, 1.2572407e-04,
-##        9.1377900e-05, 9.2568655e-07], dtype=float32)</code></pre>
+<pre><code>## array([1.3535407e-07, 9.9934298e-01, 4.0317400e-06, 5.9353294e-08,
+##        4.7198369e-04, 1.0865199e-06, 2.4188839e-06, 1.4774401e-04,
+##        2.8215865e-05, 1.3514803e-06], dtype=float32)</code></pre>
 <pre class="python"><code>np.argmax(predictions[2])</code></pre>
 <pre><code>## 1</code></pre>
 <p>As we can see, the highest probability is at index 1 (i.e., 9.99), indicating the value 1.</p>
