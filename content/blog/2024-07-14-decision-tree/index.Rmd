@@ -2,7 +2,7 @@
 title: "Decision Tree - A tree🌳to make predictions!"
 subtitle: ""
 excerpt: ""
-date: '2024-14-07'
+date: '2024-07-14'
 author: Saulo Gil
 draft: false
 images:
