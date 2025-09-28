@@ -11,8 +11,10 @@ headline: |
  
  - 👨‍🔬 I'm a `Phd` in Science from the `University of São Paulo`;
  
- - 👨‍💻 I have graduated in `Systems Analysis and Development` and `Physical Education`;
+ - 👨‍💻 I'm master degree student in `Information Engineering` at `Federal University of ABC (UFABC)`(in progress - start: 2025);
  
+ - 👨‍💻 I have graduated in `Systems Analysis and Development` and `Physical Education`;
+
  - 👨‍🔬 I'm currently a `researcher` at `HCFMUSP`;
  
  - 👨‍🏫 I'm an `associate professor` at Physical Education Department and Master's Degree course in Health Science at Universidade Santo Amaro (UNISA);
