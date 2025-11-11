@@ -26,13 +26,14 @@ In general, this theorem says that if you repeat the same random experiment many
 conditions, the sample average will get closer and closer to the true mean (also called the population mean).
 
 
-Formally, for random variables $X_1, X_2,\ldots$ with a finite mean $\mu$, the sample mean approaches $mu$ as 
+Formally, for random variables $X_1, X_2,\ldots$ with a finite mean $\mu$, the sample mean approaches $\mu$ as 
 $n$ grows.
 
 It may be stimated using the equation:
 $$
 \overline{X}_n \;=\; \frac{1}{n}\sum_{i=1}^{n} X_i,
 $$
+
 ## 🪙 Example: Coin Flips (Heads = 1, Tails = 0)
  
 Let’s simulate the Law of Large Numbers using a classic example — flipping a fair coin.

@@ -25,13 +25,15 @@ tags: []
 the results obtained from a large number of independent random samples converges to the true value, if it exists.</p>
 <p>In general, this theorem says that if you repeat the same random experiment many times under the same
 conditions, the sample average will get closer and closer to the true mean (also called the population mean).</p>
-<p>Formally, for random variables <span class="math inline">\(X_1, X_2,\ldots\)</span> with a finite mean <span class="math inline">\(\mu\)</span>, the sample mean approaches <span class="math inline">\(mu\)</span> as
+<p>Formally, for random variables <span class="math inline">\(X_1, X_2,\ldots\)</span> with a finite mean <span class="math inline">\(\mu\)</span>, the sample mean approaches <span class="math inline">\(\mu\)</span> as
 <span class="math inline">\(n\)</span> grows.</p>
 <p>It may be stimated using the equation:
 <span class="math display">\[
 \overline{X}_n \;=\; \frac{1}{n}\sum_{i=1}^{n} X_i,
-\]</span>
-## 🪙 Example: Coin Flips (Heads = 1, Tails = 0)</p>
+\]</span></p>
+</div>
+<div id="example-coin-flips-heads-1-tails-0" class="section level2">
+<h2>🪙 Example: Coin Flips (Heads = 1, Tails = 0)</h2>
 <p>Let’s simulate the Law of Large Numbers using a classic example — flipping a fair coin.</p>
 <p>For a fair coin, the chance is 0.05 <span class="math inline">\(\Rightarrow\)</span> <span class="math inline">\(\mathbb{E}[X]=0.5\)</span>.</p>
 <p>Below I simulated many flips and track the running average to show it drifting toward 0.5.</p>
