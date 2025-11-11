@@ -1,0 +1,136 @@
+---
+title: "Law of Large Numbers"
+subtitle: ""
+excerpt: ""
+date: '2025-11-11'
+author: Saulo Gil
+draft: false
+images:
+series:
+layout: single
+slug: []
+categories: []
+tags: []
+---
+
+
+
+<div id="law-of-large-numbers" class="section level1">
+<h1>Law of Large Numbers</h1>
+<!-- badges: start -->
+<!-- badges: end -->
+<div id="what-is-the-law-of-large-numbers" class="section level2">
+<h2>🚀 What is the Law of Large Numbers?</h2>
+<p>In probability theory, the Law of Large Numbers is a mathematical law that states that the average of
+the results obtained from a large number of independent random samples converges to the true value, if it exists.</p>
+<p>In general, this theorem says that if you repeat the same random experiment many times under the same
+conditions, the sample average will get closer and closer to the true mean (also called the population mean).</p>
+<p>Formally, for random variables <span class="math inline">\(X_1, X_2,\ldots\)</span> with a finite mean <span class="math inline">\(\mu\)</span>, the sample mean approaches <span class="math inline">\(mu\)</span> as
+<span class="math inline">\(n\)</span> grows.</p>
+<p>It may be stimated using the equation:
+<span class="math display">\[
+\overline{X}_n \;=\; \frac{1}{n}\sum_{i=1}^{n} X_i,
+\]</span>
+## 🪙 Example: Coin Flips (Heads = 1, Tails = 0)</p>
+<p>Let’s simulate the Law of Large Numbers using a classic example — flipping a fair coin.</p>
+<p>For a fair coin, the chance is 0.05 <span class="math inline">\(\Rightarrow\)</span> <span class="math inline">\(\mathbb{E}[X]=0.5\)</span>.</p>
+<p>Below I simulated many flips and track the running average to show it drifting toward 0.5.</p>
+<pre class="r"><code>library(ggplot2)
+
+# seed
+
+set.seed(123)
+
+# number of flips
+n &lt;- 2000 
+
+# trials
+x &lt;- rbinom(n, size = 1, prob = 0.5)  # Heads=1, Tails=0
+
+# cummulative means
+running_mean &lt;- cumsum(x) / seq_along(x)
+
+df &lt;- data.frame(
+  trial = 1:n,
+  running_mean = round(running_mean, 2))</code></pre>
+</div>
+<div id="take-a-look-at-the-first-10-and-the-last-10-experiments." class="section level2">
+<h2>👀 Take a look at the first 10 and the last 10 experiments.</h2>
+<div id="first-10-experiments" class="section level3">
+<h3>First 10 experiments</h3>
+<pre class="r"><code>df |&gt; 
+  dplyr::select(trial,running_mean) |&gt;
+  dplyr::slice_head(n = 10)</code></pre>
+<pre><code>##    trial running_mean
+## 1      1         0.00
+## 2      2         0.50
+## 3      3         0.33
+## 4      4         0.50
+## 5      5         0.60
+## 6      6         0.50
+## 7      7         0.57
+## 8      8         0.62
+## 9      9         0.67
+## 10    10         0.60</code></pre>
+</div>
+<div id="last-10-experiments" class="section level3">
+<h3>Last 10 experiments</h3>
+<pre class="r"><code>df |&gt; 
+  dplyr::select(trial,running_mean) |&gt;
+  dplyr::slice_tail(n = 10)</code></pre>
+<pre><code>##    trial running_mean
+## 1   1991          0.5
+## 2   1992          0.5
+## 3   1993          0.5
+## 4   1994          0.5
+## 5   1995          0.5
+## 6   1996          0.5
+## 7   1997          0.5
+## 8   1998          0.5
+## 9   1999          0.5
+## 10  2000          0.5</code></pre>
+<p>As we can see 👀, in the early trials, the sample mean bounces around and often sits far from the true mean 0.5.</p>
+<p>However, in the later trials, the running average steadily converges toward 0.5, aligning with the true value. 📈✨✅</p>
+</div>
+</div>
+<div id="lets-plot-the-simulation" class="section level2">
+<h2>🎨 Let’s plot the simulation</h2>
+<pre class="r"><code>df |&gt;
+  ggplot(aes(trial, running_mean)) +
+  geom_line(linewidth = 0.8) +
+  geom_hline(yintercept = 0.5, 
+             linetype = &quot;dashed&quot;,
+             color = &quot;red&quot;, 
+             linewidth = 0.6) +
+  scale_y_continuous(limits = c(0, 0.8)) +
+  labs(
+    title = &quot;Running Average of Coin Flips Converges to 0.5 🎯&quot;,
+    subtitle = &quot;Law of Large Numbers in action&quot;,
+    x = &quot;Number of flips&quot;,
+    y = &quot;Running average&quot;
+  ) +
+  ggthemes::theme_economist()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-4-1.png" width="768" /></p>
+</div>
+<div id="what-can-we-see-and-practical-applications" class="section level2">
+<h2>👀 What can we see and Practical Applications⚠️</h2>
+<p>Again, as expected, in the early experiments, the sample mean fluctuates considerably, but as the number of experiments grows, it steadily converges to the true value (0.5).</p>
+<p>It justifies using sample means for estimation in distinct areas, for instance:</p>
+<ul>
+<li><p>🧪 Clinical trials (research): Averaging patient outcomes across many participants makes the treatment effect stabilize around its true value, supporting reliable estimates of efficacy and safety.</p></li>
+<li><p>🧫 A/B testing: With more users, average conversion rates settle near the true rates, letting teams decide which variant truly performs better.</p></li>
+<li><p>🗳️ Polling &amp; surveys: Larger, well-sampled polls yield averages (approval, intention to vote, prevalence) that home in on population values.</p></li>
+<li><p>🏭 Quality control: Averaging defect counts or measurements over many items reveals the true process mean, guiding process adjustments and Six Sigma targets.</p></li>
+<li><p>🧮 Monte Carlo simulation: Sample means of simulated outcomes converge to expected values, underpinning pricing (e.g., options), reliability estimation, and uncertainty quantification.</p></li>
+<li><p>🧾 Econometrics &amp; big data: Estimators built from sample averages (moments, means, residuals) become stable with large datasets, improving inference and model selection.</p></li>
+<li><p>🧑‍⚕️ Epidemiology &amp; public health: Averaging incidence or biomarker readings across large cohorts yields stable estimates of prevalence, risk factors, and baseline rates.</p></li>
+</ul>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<ul>
+<li><p><a href="https://mdipierro.github.io/DePaul/books/probability-dekking.pdf">Book - Dekking, et al A Modern Introduction to Probability and Statistics</a>;</p></li>
+<li><p><a href="https://en.wikipedia.org/wiki/Law_of_large_numbers">Wikipedia - Law of large numbers</a></p></li>
+</ul>
+</div>
+</div>
