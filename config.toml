@@ -92,7 +92,7 @@ enableEmoji = true
   [[params.social]]
       icon      = "linkedin" # icon name without the 'fa-'
       icon_pack = "fab"
-      url       = "https://www.linkedin.com/in/saulo-gil-b3a9061a0/"
+      url       = "https://www.linkedin.com/in/saulosgil/"
   [[params.social]]
       icon      = "twitter" # icon name without the 'fa-'
       icon_pack = "fab"
